@@ -839,7 +839,7 @@ export default function Home() {
       <aside className="sidebar">
         <div>
           <a className="brand" href="#top" aria-label="LPmaker ホーム">
-            <span className="brand-mark">L</span>
+            <img className="brand-mark" src={`${import.meta.env.BASE_URL}lpmaker-icon.png`} alt="" aria-hidden="true" />
             <span>LPmaker</span>
           </a>
           <div className="mascot-card">
