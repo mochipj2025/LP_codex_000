@@ -3,6 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import "./style.css";
 
+type ExternalLink = {
+  id: string;
+  type: string;
+  label: string;
+  url: string;
+};
+
 type ProjectData = {
   repositoryUrl: string;
   personaMode: "ai" | "manual";
@@ -25,6 +32,7 @@ type ProjectData = {
   ctaType: string;
   ctaLabel: string;
   ctaUrl: string;
+  externalLinks: ExternalLink[];
   noteTypes: string[];
   notes: string;
   lpType: string;
@@ -53,6 +61,7 @@ const initialData: ProjectData = {
   ctaType: "",
   ctaLabel: "",
   ctaUrl: "",
+  externalLinks: [],
   noteTypes: [],
   notes: "",
   lpType: "conversion",
@@ -135,6 +144,20 @@ const ctaOptions: QuestionOption[] = [
   { id: "reserve", label: "予約・申込みをする" },
   { id: "download", label: "資料をダウンロードする" },
   { id: "apply", label: "応募する" },
+  { id: "other", label: "その他" },
+];
+
+const externalLinkTypes: QuestionOption[] = [
+  { id: "map", label: "地図・アクセス" },
+  { id: "instagram", label: "Instagram" },
+  { id: "x", label: "X（Twitter）" },
+  { id: "facebook", label: "Facebook" },
+  { id: "tiktok", label: "TikTok" },
+  { id: "youtube", label: "YouTube" },
+  { id: "line", label: "LINE" },
+  { id: "booking", label: "予約ページ" },
+  { id: "store", label: "オンラインストア" },
+  { id: "website", label: "公式サイト" },
   { id: "other", label: "その他" },
 ];
 
@@ -296,6 +319,10 @@ function normalize(value: string) {
   return value.trim() || "未指定（制作時に合理的な仮説を置き、要確認として明示）";
 }
 
+function externalLinkTypeLabel(type: string) {
+  return externalLinkTypes.find((item) => item.id === type)?.label ?? "その他";
+}
+
 function slugify(value: string) {
   const slug = value
     .normalize("NFKC")
@@ -439,6 +466,17 @@ function buildFiles(data: ProjectData) {
   const offer = answerText(data.offerTypes, offerOptions, data.offer);
   const ctaLabel = answerText(data.ctaType, ctaOptions, data.ctaLabel);
   const notes = answerText(data.noteTypes, noteOptions, data.notes);
+  const externalLinks = (data.externalLinks ?? [])
+    .filter((link) => link.url.trim())
+    .map((link) => ({
+      type: link.type,
+      typeLabel: externalLinkTypeLabel(link.type),
+      label: link.label.trim() || externalLinkTypeLabel(link.type),
+      url: link.url.trim(),
+    }));
+  const externalLinksText = externalLinks.length > 0
+    ? externalLinks.map((link) => `- ${link.typeLabel}｜${link.label}: ${link.url}`).join("\n")
+    : "- 未指定";
   const slug = slugify(data.projectName);
   const generatedAt = new Date().toISOString();
   const project = {
@@ -455,6 +493,7 @@ function buildFiles(data: ProjectData) {
       audience: normalize(audience),
       primaryGoal: normalize(goal),
       cta: { label: normalize(ctaLabel), url: normalize(data.ctaUrl) },
+      externalLinks,
     },
     persona: {
       mode: data.personaMode === "ai" ? "infer-with-codex" : "manual",
@@ -513,6 +552,9 @@ ${normalize(offer)}
 - ラベル: ${normalize(ctaLabel)}
 - 遷移先: ${normalize(data.ctaUrl)}
 
+## 店舗・SNS・外部リンク
+${externalLinksText}
+
 ## 構成方針
 - 型: ${lpType.title}
 - 推奨セクション: ${lpType.structure.join(" → ")}
@@ -565,6 +607,10 @@ ${normalize(notes)}
 - persona.mode が infer-with-codex の場合は、商品・サービス、想定ユーザー、LPのゴールから1〜2名のペルソナを仮説生成する。
 - AI推測したペルソナ・悩み・利用後の変化は制作上の仮説として扱い、実績・数値・顧客の発言などの確認済み事実として断定しない。
 - persona.mode が manual の場合は、入力された悩みと変化を優先する。
+- project.externalLinks の type が map のリンクはアクセス案内へ、SNSはプロフィールまたはフッターへ配置する。
+- booking、store、website は目的に応じてCTA付近にも配置できるが、最優先CTAと競合させない。
+- 外部リンクは登録されたURLだけを使い、URLやアカウント名を推測して作らない。
+- 新しいタブで開く外部リンクには rel="noopener noreferrer" を設定する。
 `;
 
   const copy = `# 掲載コピー素材
@@ -589,6 +635,9 @@ ${normalize(offer)}
 
 ## 行動喚起
 ${normalize(ctaLabel)} — ${normalize(data.ctaUrl)}
+
+## 店舗・SNS・外部リンク
+${externalLinksText}
 
 ## その他の要望
 ${normalize(notes)}
@@ -735,6 +784,19 @@ export default function Home() {
   function update<K extends keyof ProjectData>(key: K, value: ProjectData[K]) {
     setData((current) => ({ ...current, [key]: value }));
     setDownloaded(false);
+  }
+
+  function addExternalLink() {
+    const id = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `link-${Date.now()}`;
+    update("externalLinks", [...(data.externalLinks ?? []), { id, type: "map", label: "", url: "" }]);
+  }
+
+  function changeExternalLink(id: string, key: "type" | "label" | "url", value: string) {
+    update("externalLinks", (data.externalLinks ?? []).map((link) => link.id === id ? { ...link, [key]: value } : link));
+  }
+
+  function removeExternalLink(id: string) {
+    update("externalLinks", (data.externalLinks ?? []).filter((link) => link.id !== id));
   }
 
   function downloadProject() {
@@ -956,6 +1018,36 @@ export default function Home() {
                     <input value={data.ctaUrl} onChange={(e) => update("ctaUrl", e.target.value)} placeholder="https://example.com/contact" inputMode="url" />
                   </label>
                 </div>
+                <section className="external-links-editor" aria-labelledby="external-links-title">
+                  <div className="external-links-heading">
+                    <div><h3 id="external-links-title">店舗・SNS・外部リンク</h3><p>地図、Instagram、LINE、予約ページなどを必要な数だけ登録できます。</p></div>
+                    <span>任意・複数可</span>
+                  </div>
+                  {(data.externalLinks ?? []).length === 0 ? (
+                    <div className="external-links-empty">道案内やSNSがある場合は「リンクを追加」を押してください。</div>
+                  ) : (
+                    <div className="external-link-list">
+                      {(data.externalLinks ?? []).map((link, index) => (
+                        <div className="external-link-row" key={link.id}>
+                          <label>種類
+                            <select value={link.type} onChange={(event) => changeExternalLink(link.id, "type", event.target.value)}>
+                              {externalLinkTypes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                            </select>
+                          </label>
+                          <label>表示名
+                            <input value={link.label} onChange={(event) => changeExternalLink(link.id, "label", event.target.value)} placeholder={externalLinkTypeLabel(link.type)} />
+                          </label>
+                          <label>URL
+                            <input value={link.url} onChange={(event) => changeExternalLink(link.id, "url", event.target.value)} placeholder="https://..." inputMode="url" />
+                          </label>
+                          <button type="button" className="remove-link" onClick={() => removeExternalLink(link.id)} aria-label={`${index + 1}件目のリンクを削除`}>×</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <button type="button" className="add-link" onClick={addExternalLink}>＋ リンクを追加</button>
+                  <p className="external-links-note">地図はアクセス案内、SNSはプロフィールやフッター、予約ページは目的に応じてCTA付近へ配置されます。</p>
+                </section>
               </div>
             </div>
           )}
@@ -1038,6 +1130,7 @@ export default function Home() {
                     <div><dt>お客さま像</dt><dd>{data.personaMode === "ai" ? "商品情報からCodexが推測" : "自分で選んだ内容を使用"}</dd></div>
                     <div><dt>ゴール</dt><dd>{goalAnswer || "未選択"}</dd></div>
                     <div><dt>CTA</dt><dd>{ctaAnswer || "未選択"}</dd></div>
+                    <div><dt>追加リンク</dt><dd>{(data.externalLinks ?? []).filter((link) => link.url.trim()).length > 0 ? `${(data.externalLinks ?? []).filter((link) => link.url.trim()).length}件` : "なし"}</dd></div>
                   </dl>
                 </div>
                 <div className="review-card direction-card">
