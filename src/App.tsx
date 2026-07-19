@@ -89,41 +89,41 @@ const goalOptions: QuestionOption[] = [
 ];
 
 const problemOptions: QuestionOption[] = [
-  { id: "unknown", label: "魅力が伝わっていない" },
-  { id: "leads", label: "集客・問い合わせが少ない" },
-  { id: "trust", label: "安心材料が足りない" },
-  { id: "compare", label: "他社との違いが曖昧" },
-  { id: "complex", label: "内容が複雑で伝わりにくい" },
-  { id: "action", label: "見られるが行動されない" },
-  { id: "other", label: "その他" },
+  { id: "unknown", label: "魅力が伝わっていない", help: "良い商品なのに価値を説明できない" },
+  { id: "leads", label: "集客・問い合わせが少ない", help: "見つけてもらえず相談につながらない" },
+  { id: "trust", label: "安心材料が足りない", help: "実績や声が少なく不安を持たれる" },
+  { id: "compare", label: "他社との違いが曖昧", help: "選ばれる理由をうまく伝えられない" },
+  { id: "complex", label: "内容が複雑で伝わりにくい", help: "説明が長く、理解してもらいにくい" },
+  { id: "action", label: "見られるが行動されない", help: "閲覧はあるが購入や相談が増えない" },
+  { id: "other", label: "その他", help: "近いものがなければ補足欄へ入力" },
 ];
 
 const benefitOptions: QuestionOption[] = [
-  { id: "time", label: "時間・手間を減らせる" },
-  { id: "result", label: "成果を高められる" },
-  { id: "clarity", label: "判断しやすくなる" },
-  { id: "safe", label: "安心して進められる" },
-  { id: "skill", label: "知識・スキルが身につく" },
-  { id: "experience", label: "心地よい体験が得られる" },
-  { id: "other", label: "その他" },
+  { id: "time", label: "時間・手間を減らせる", help: "面倒な作業が早く・簡単になる" },
+  { id: "result", label: "成果を高められる", help: "売上・集客・仕事の質が上がる" },
+  { id: "clarity", label: "判断しやすくなる", help: "情報が整理され、迷いが減る" },
+  { id: "safe", label: "安心して進められる", help: "失敗への不安を減らして取り組める" },
+  { id: "skill", label: "知識・スキルが身につく", help: "自分でできることが増える" },
+  { id: "experience", label: "心地よい体験が得られる", help: "楽しい・うれしい気持ちになれる" },
+  { id: "other", label: "その他", help: "独自の変化は補足欄へ入力" },
 ];
 
 const proofOptions: QuestionOption[] = [
-  { id: "cases", label: "導入・制作事例がある" },
-  { id: "voices", label: "お客さまの声がある" },
-  { id: "numbers", label: "実績を示す数字がある" },
-  { id: "license", label: "資格・受賞歴がある" },
-  { id: "media", label: "メディア掲載がある" },
-  { id: "none", label: "まだ用意できていない" },
+  { id: "cases", label: "導入・制作事例がある", help: "実際の利用例や完成事例を載せられる" },
+  { id: "voices", label: "お客さまの声がある", help: "感想・レビュー・推薦コメントがある" },
+  { id: "numbers", label: "実績を示す数字がある", help: "件数・年数・改善率などを示せる" },
+  { id: "license", label: "資格・受賞歴がある", help: "専門性を証明できる資格や受賞がある" },
+  { id: "media", label: "メディア掲載がある", help: "新聞・Web・テレビなどの掲載歴がある" },
+  { id: "none", label: "まだ用意できていない", help: "現時点で掲載できる材料がない" },
 ];
 
 const offerOptions: QuestionOption[] = [
-  { id: "consultation", label: "無料相談" },
-  { id: "trial", label: "無料体験・お試し" },
-  { id: "download", label: "無料資料・特典" },
-  { id: "discount", label: "期間限定キャンペーン" },
-  { id: "price", label: "料金プランを掲載" },
-  { id: "none", label: "特別なオファーはない" },
+  { id: "consultation", label: "無料相談", help: "まず話を聞く機会を用意する" },
+  { id: "trial", label: "無料体験・お試し", help: "購入前に使って確かめてもらう" },
+  { id: "download", label: "無料資料・特典", help: "資料やチェックリストを渡す" },
+  { id: "discount", label: "期間限定キャンペーン", help: "期限付きの割引や特典を案内する" },
+  { id: "price", label: "料金プランを掲載", help: "費用とプランの違いを明確にする" },
+  { id: "none", label: "特別なオファーはない", help: "通常の問い合わせ・購入へ案内する" },
 ];
 
 const ctaOptions: QuestionOption[] = [
@@ -806,12 +806,15 @@ export default function Home() {
               <div className="form-card">
                 <div className="section-title">
                   <span>02</span>
-                  <div><h2>伝えたい内容</h2><p>複数選択できます。補足は任意です</p></div>
+                  <div><h2>お客さまの悩みと、届けたい変化</h2><p>LPのストーリーに必要な4つの材料を、順番に選びます</p></div>
                 </div>
-                <SelectionQuestion title="ユーザーは何に困っていますか？" description="商品・サービスを探すきっかけになる悩みを選びます。" multiple options={problemOptions} value={data.problemTypes} onChange={(value) => update("problemTypes", value as string[])} details={data.problems} onDetailsChange={(value) => update("problems", value)} placeholder="具体的な悩み、よく聞く相談、困る場面など" />
-                <SelectionQuestion title="利用すると、どんな良い変化がありますか？" description="購入後・利用後に得られる結果や気持ちを選びます。" multiple options={benefitOptions} value={data.benefitTypes} onChange={(value) => update("benefitTypes", value as string[])} details={data.benefits} onDetailsChange={(value) => update("benefits", value)} placeholder="利用前と利用後の違い、得られる成果など" />
-                <SelectionQuestion title="信頼につながる材料はありますか？" description="安心して選んでもらうために、実際に掲載できる根拠を選びます。" multiple options={proofOptions} value={data.proofTypes} onChange={(value) => update("proofTypes", value as string[])} details={data.proof} onDetailsChange={(value) => update("proof", value)} placeholder="実績数、具体的な事例、資格名、掲載メディアなど" />
-                <SelectionQuestion title="用意しているオファーはありますか？" description="読んだ人が最初の一歩を踏み出しやすくなる提案を選びます。" multiple options={offerOptions} value={data.offerTypes} onChange={(value) => update("offerTypes", value as string[])} details={data.offer} onDetailsChange={(value) => update("offer", value)} placeholder="料金、特典、期限、対象条件など" />
+                <div className="content-flow-guide" aria-label="入力する内容の流れ">
+                  <span><b>1</b>利用前の悩み</span><i>→</i><span><b>2</b>利用後の変化</span><i>→</i><span><b>3</b>安心できる理由</span><i>→</i><span><b>4</b>最初の一歩</span>
+                </div>
+                <SelectionQuestion title="1. お客さまは、どんな状態でこの商品・サービスを探しますか？" description="利用する前の困りごとです。実際によく聞く相談に近いものを選んでください。" multiple options={problemOptions} value={data.problemTypes} onChange={(value) => update("problemTypes", value as string[])} details={data.problems} onDetailsChange={(value) => update("problems", value)} placeholder="例：毎回説明に時間がかかる、問い合わせが月に数件しかない" />
+                <SelectionQuestion title="2. 利用後、お客さまにどうなってほしいですか？" description="商品・サービスを使った後に得られる結果や、感じてほしい気持ちを選びます。" multiple options={benefitOptions} value={data.benefitTypes} onChange={(value) => update("benefitTypes", value as string[])} details={data.benefits} onDetailsChange={(value) => update("benefits", value)} placeholder="例：作業時間が半分になる、自信を持って判断できる" />
+                <SelectionQuestion title="3. 申し込む前の不安を減らせる材料はありますか？" description="実際にLPへ掲載できる事例・声・数字などを選びます。ない場合は「まだ用意できていない」で大丈夫です。" multiple options={proofOptions} value={data.proofTypes} onChange={(value) => update("proofTypes", value as string[])} details={data.proof} onDetailsChange={(value) => update("proof", value)} placeholder="例：導入120社、お客さまの感想3件、資格名、掲載メディア名" />
+                <SelectionQuestion title="4. お客さまが最初の一歩を踏み出しやすくなる案内はありますか？" description="無料相談・お試し・資料など、いきなり購入しなくても試せるものを選びます。" multiple options={offerOptions} value={data.offerTypes} onChange={(value) => update("offerTypes", value as string[])} details={data.offer} onDetailsChange={(value) => update("offer", value)} placeholder="例：30分無料相談、7日間無料、今月末まで10%オフ" />
               </div>
 
               <div className="form-card">

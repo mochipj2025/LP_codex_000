@@ -15,4 +15,6 @@ test("builds a GitHub Pages-ready static site", () => {
   assert.match(appSource, /forbiddenPlatforms/);
   assert.match(appSource, /ChatGPT Sites、OpenAI Sites/);
   assert.match(appSource, /http:\/\/localhost:8000\/index\.html/);
+  assert.match(appSource, /利用前の悩み/);
+  assert.match(appSource, /申し込む前の不安を減らせる材料/);
 });

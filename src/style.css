@@ -96,6 +96,10 @@ button { color: inherit; }
 .section-title > span { padding-top: 3px; color: var(--accent); font: 700 10px/1 ui-monospace, monospace; }
 .section-title h2 { margin: 0 0 6px; font-size: 19px; letter-spacing: -.02em; }
 .section-title p { margin: 0; color: #7b817e; font-size: 13px; line-height: 1.6; }
+.content-flow-guide { margin: -4px 0 25px; padding: 14px 16px; display: flex; align-items: center; justify-content: center; gap: 10px; color: #6c5b52; background: #fff1d8; border-radius: 11px; font-size: 12px; font-weight: 700; }
+.content-flow-guide span { display: flex; align-items: center; gap: 6px; }
+.content-flow-guide b { width: 22px; height: 22px; display: grid; place-items: center; color: #3d2a24; background: var(--sky); border-radius: 50%; font-size: 10px; }
+.content-flow-guide i { color: #bd8a64; font-style: normal; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 18px; }
 .form-grid.two-cols { grid-template-columns: 1fr 1fr; }
 .form-grid label { display: grid; gap: 8px; color: #3e4743; font-size: 14px; font-weight: 800; }
@@ -249,6 +253,8 @@ button { color: inherit; }
   .stage-heading h1 { font-size: clamp(39px, 12vw, 56px); }
   .stage-heading p { font-size: 15px; }
   .form-card { padding: 24px 19px 27px; border-radius: 12px; }
+  .content-flow-guide { justify-content: flex-start; flex-wrap: wrap; }
+  .content-flow-guide i { display: none; }
   .repo-setup { padding: 23px 19px; grid-template-columns: 1fr; gap: 15px; border-radius: 14px; }
   .repo-setup-number { width: 46px; height: 46px; }
   .repo-setup ol { grid-template-columns: 1fr; }
