@@ -3,6 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import "./style.css";
 
+type ExternalLink = {
+  id: string;
+  type: string;
+  label: string;
+  url: string;
+};
+
 type ProjectData = {
   repositoryUrl: string;
   personaMode: "ai" | "manual";
@@ -25,6 +32,7 @@ type ProjectData = {
   ctaType: string;
   ctaLabel: string;
   ctaUrl: string;
+  externalLinks: ExternalLink[];
   noteTypes: string[];
   notes: string;
   lpType: string;
@@ -53,6 +61,7 @@ const initialData: ProjectData = {
   ctaType: "",
   ctaLabel: "",
   ctaUrl: "",
+  externalLinks: [],
   noteTypes: [],
   notes: "",
   lpType: "conversion",
@@ -135,6 +144,20 @@ const ctaOptions: QuestionOption[] = [
   { id: "reserve", label: "予約・申込みをする" },
   { id: "download", label: "資料をダウンロードする" },
   { id: "apply", label: "応募する" },
+  { id: "other", label: "その他" },
+];
+
+const externalLinkTypes: QuestionOption[] = [
+  { id: "map", label: "地図・アクセス" },
+  { id: "instagram", label: "Instagram" },
+  { id: "x", label: "X（Twitter）" },
+  { id: "facebook", label: "Facebook" },
+  { id: "tiktok", label: "TikTok" },
+  { id: "youtube", label: "YouTube" },
+  { id: "line", label: "LINE" },
+  { id: "booking", label: "予約ページ" },
+  { id: "store", label: "オンラインストア" },
+  { id: "website", label: "公式サイト" },
   { id: "other", label: "その他" },
 ];
 
@@ -296,6 +319,10 @@ function normalize(value: string) {
   return value.trim() || "未指定（制作時に合理的な仮説を置き、要確認として明示）";
 }
 
+function externalLinkTypeLabel(type: string) {
+  return externalLinkTypes.find((item) => item.id === type)?.label ?? "その他";
+}
+
 function slugify(value: string) {
   const slug = value
     .normalize("NFKC")
@@ -388,6 +415,39 @@ function createZip(files: Array<{ name: string; content: string }>) {
   return new Blob([...localParts, ...centralParts, bufferOf(end)], { type: "application/zip" });
 }
 
+function buildCodexSkillset() {
+  return `# LP制作スキルセット
+
+このタスクでは、次に共有されるLPmakerの制作フォルダを使ってLPを完成させるため、以下のルールを適用してください。
+
+## 役割
+- あなたはLPの構成、コピー、デザイン、実装、画像配置、表示確認まで担当する制作担当者です。
+- フォルダ内の project.json、BRIEF.md、AGENTS.md、content/COPY.md、assets/IMAGE_BRIEF.md を一次情報として扱います。
+- 情報が未指定の箇所は合理的な仮説で補えますが、実績、価格、資格、顧客の発言、数値を捏造しません。
+
+## 作業ルール
+- project.json の repositoryUrl にある個別リポジトリを制作先にします。
+- ChatGPT Sites、OpenAI Sites、*.chatgpt.site は使わず、.openai/hosting.json も作りません。
+- リポジトリ直下の index.html を公開・プレビュー入口にし、CSS、JavaScript、画像は相対パスで参照します。
+- 必要な画像は assets/IMAGE_BRIEF.md に従って生成または配置します。
+- 実装後はリンク、CTA、モバイル表示を確認し、ローカルの index.html をプレビューしてからcommit・pushします。
+
+## 開始方法
+- このスキルセットを受け取った時点では、まず「LP制作ルールをセットしました。制作フォルダと開始文を送ってください。」と短く返してください。
+- 次のメッセージで制作フォルダと「LP制作を開始してください」という開始文を受け取ったら、準備状況の説明だけで終わらず、実装作業を開始してください。
+`;
+}
+
+function buildCodexStartInstruction() {
+  return `LP制作を開始してください。
+
+共有したLPmakerフォルダの START_HERE.md、AGENTS.md、project.json、BRIEF.md を先に読み、project.json の repositoryUrl にある個別リポジトリへLPを実装してください。
+
+準備の説明だけで終了せず、リポジトリの確認またはcloneから実装へ進んでください。未指定項目は制作上の仮説で補って構いませんが、実績・価格・資格・顧客の声・数値は捏造しないでください。ChatGPT Sites・OpenAI Sites・*.chatgpt.site は使わず、.openai/hosting.json も作成しないでください。
+
+入口はリポジトリ直下の index.html にし、相対パスで動く静的サイトとして制作してください。必要な画像を生成・配置し、リポジトリ直下で python -m http.server 8000 を実行して http://localhost:8000/index.html を確認してください。表示とCTAを確認したらcommit・pushまで完了し、最後にプレビュー方法と変更内容を報告してください。`;
+}
+
 function buildFiles(data: ProjectData) {
   const lpType = lpTypes.find((item) => item.id === data.lpType) ?? lpTypes[0];
   const mood = moods.find((item) => item.id === data.mood) ?? moods[0];
@@ -406,6 +466,17 @@ function buildFiles(data: ProjectData) {
   const offer = answerText(data.offerTypes, offerOptions, data.offer);
   const ctaLabel = answerText(data.ctaType, ctaOptions, data.ctaLabel);
   const notes = answerText(data.noteTypes, noteOptions, data.notes);
+  const externalLinks = (data.externalLinks ?? [])
+    .filter((link) => link.url.trim())
+    .map((link) => ({
+      type: link.type,
+      typeLabel: externalLinkTypeLabel(link.type),
+      label: link.label.trim() || externalLinkTypeLabel(link.type),
+      url: link.url.trim(),
+    }));
+  const externalLinksText = externalLinks.length > 0
+    ? externalLinks.map((link) => `- ${link.typeLabel}｜${link.label}: ${link.url}`).join("\n")
+    : "- 未指定";
   const slug = slugify(data.projectName);
   const generatedAt = new Date().toISOString();
   const project = {
@@ -422,6 +493,7 @@ function buildFiles(data: ProjectData) {
       audience: normalize(audience),
       primaryGoal: normalize(goal),
       cta: { label: normalize(ctaLabel), url: normalize(data.ctaUrl) },
+      externalLinks,
     },
     persona: {
       mode: data.personaMode === "ai" ? "infer-with-codex" : "manual",
@@ -480,6 +552,9 @@ ${normalize(offer)}
 - ラベル: ${normalize(ctaLabel)}
 - 遷移先: ${normalize(data.ctaUrl)}
 
+## 店舗・SNS・外部リンク
+${externalLinksText}
+
 ## 構成方針
 - 型: ${lpType.title}
 - 推奨セクション: ${lpType.structure.join(" → ")}
@@ -532,6 +607,10 @@ ${normalize(notes)}
 - persona.mode が infer-with-codex の場合は、商品・サービス、想定ユーザー、LPのゴールから1〜2名のペルソナを仮説生成する。
 - AI推測したペルソナ・悩み・利用後の変化は制作上の仮説として扱い、実績・数値・顧客の発言などの確認済み事実として断定しない。
 - persona.mode が manual の場合は、入力された悩みと変化を優先する。
+- project.externalLinks の type が map のリンクはアクセス案内へ、SNSはプロフィールまたはフッターへ配置する。
+- booking、store、website は目的に応じてCTA付近にも配置できるが、最優先CTAと競合させない。
+- 外部リンクは登録されたURLだけを使い、URLやアカウント名を推測して作らない。
+- 新しいタブで開く外部リンクには rel="noopener noreferrer" を設定する。
 `;
 
   const copy = `# 掲載コピー素材
@@ -556,6 +635,9 @@ ${normalize(offer)}
 
 ## 行動喚起
 ${normalize(ctaLabel)} — ${normalize(data.ctaUrl)}
+
+## 店舗・SNS・外部リンク
+${externalLinksText}
 
 ## その他の要望
 ${normalize(notes)}
@@ -582,6 +664,32 @@ ${mood.colors.join(" / ")}
 - 信頼セクション: ${normalize(proof)} を補強する実物・工程・人物（事実確認できる場合のみ）
 `;
 
+  const skillset = buildCodexSkillset();
+  const startInstruction = buildCodexStartInstruction();
+
+  const startHere = `# 最初にお読みください
+
+フォルダを共有するだけでは、Codexへの作業開始指示にはなりません。次の順番で進めてください。
+
+## 1. LP制作ルールをセットする
+LPmakerの完了画面にある「① 制作ルールをコピー」を押し、新しいCodexタスクへ貼り付けて送信します。
+
+## 2. ZIPを展開する
+ダウンロードしたZIPを右クリックし、「すべて展開」を選びます。ZIPのままではなく、展開後のフォルダを使います。
+
+## 3. フォルダと開始文を一緒に送る
+展開したフォルダを同じCodexタスクへ共有します。続けてLPmakerの「② 開始文をコピー」を押し、貼り付けて送信します。
+
+## 4. index.htmlで確認する
+Codexが個別リポジトリへ実装し、http://localhost:8000/index.html で表示を確認します。
+
+## 制作ルール
+${skillset}
+
+## 作業開始文
+${startInstruction}
+`;
+
   const readme = `# ${normalize(data.projectName)}
 
 LPmakerから書き出されたLP制作プロジェクトです。
@@ -592,10 +700,17 @@ LPmakerから書き出されたLP制作プロジェクトです。
 - プレビュー: リポジトリ直下で \`python -m http.server 8000\` → \`http://localhost:8000/index.html\`
 - 使用禁止: ChatGPT Sites / OpenAI Sites / *.chatgpt.site
 
-## Codexへの依頼文
-「このフォルダの AGENTS.md と project.json を先に読んでください。project.json の repositoryUrl にある個別リポジトリへ、BRIEF.md に沿ったLPを実装してください。ChatGPT Sites・OpenAI Sites・*.chatgpt.site は使わず、.openai/hosting.json も作成しないでください。入口はリポジトリ直下の index.html にし、相対パスで動く静的サイトとして制作してください。リポジトリ直下で python -m http.server 8000 を実行し、http://localhost:8000/index.html でプレビューしてください。必要な画像は assets/IMAGE_BRIEF.md を参照して生成・配置し、最後に表示とCTAを確認してcommit・pushしてください。」
+## Codexでの開始方法
+1. LPmakerの完了画面から「① 制作ルールをコピー」し、新しいCodexタスクへ貼り付けて送信する。
+2. このフォルダを同じCodexタスクへ共有する。
+3. 「② 開始文をコピー」した文章を貼り付けて送信し、作業を開始する。
+
+詳しい手順とコピー用文章は START_HERE.md にも保存されています。
 
 ## フォルダ構成
+- START_HERE.md: 最初に行う手順とコピー用文章
+- CODEX_SKILLSET.md: 最初にCodexへセットする制作ルール
+- CODEX_START_PROMPT.txt: フォルダ共有後に送る作業開始文
 - project.json: 確定情報と制作方針
 - BRIEF.md: 人が読みやすい制作ブリーフ
 - AGENTS.md: Codex向け実装ルール
@@ -606,6 +721,9 @@ LPmakerから書き出されたLP制作プロジェクトです。
   return {
     slug,
     files: [
+      { name: `${slug}/START_HERE.md`, content: startHere },
+      { name: `${slug}/CODEX_SKILLSET.md`, content: skillset },
+      { name: `${slug}/CODEX_START_PROMPT.txt`, content: startInstruction },
       { name: `${slug}/project.json`, content: JSON.stringify(project, null, 2) },
       { name: `${slug}/BRIEF.md`, content: brief },
       { name: `${slug}/AGENTS.md`, content: agents },
@@ -621,7 +739,8 @@ export default function Home() {
   const [data, setData] = useState<ProjectData>(initialData);
   const [saved, setSaved] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
-  const [instructionCopied, setInstructionCopied] = useState(false);
+  const [skillsetCopied, setSkillsetCopied] = useState(false);
+  const [startCopied, setStartCopied] = useState(false);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("lpmaker-draft-v1");
@@ -667,6 +786,19 @@ export default function Home() {
     setDownloaded(false);
   }
 
+  function addExternalLink() {
+    const id = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `link-${Date.now()}`;
+    update("externalLinks", [...(data.externalLinks ?? []), { id, type: "map", label: "", url: "" }]);
+  }
+
+  function changeExternalLink(id: string, key: "type" | "label" | "url", value: string) {
+    update("externalLinks", (data.externalLinks ?? []).map((link) => link.id === id ? { ...link, [key]: value } : link));
+  }
+
+  function removeExternalLink(id: string) {
+    update("externalLinks", (data.externalLinks ?? []).filter((link) => link.id !== id));
+  }
+
   function downloadProject() {
     if (required.length > 0) return;
     const output = buildFiles(data);
@@ -690,11 +822,16 @@ export default function Home() {
     window.localStorage.removeItem("lpmaker-draft-v1");
   }
 
-  async function copyCodexInstruction() {
-    const instruction = "このフォルダの AGENTS.md と project.json を先に読んでください。project.json の repositoryUrl にある個別リポジトリへ、BRIEF.md に沿ったLPを実装してください。ChatGPT Sites・OpenAI Sites・*.chatgpt.site は使わず、.openai/hosting.json も作成しないでください。入口はリポジトリ直下の index.html にし、相対パスで動く静的サイトとして制作してください。リポジトリ直下で python -m http.server 8000 を実行し、http://localhost:8000/index.html でプレビューしてください。必要な画像は assets/IMAGE_BRIEF.md を参照して生成・配置し、最後に表示とCTAを確認してcommit・pushしてください。";
-    await navigator.clipboard.writeText(instruction);
-    setInstructionCopied(true);
-    window.setTimeout(() => setInstructionCopied(false), 1800);
+  async function copySkillset() {
+    await navigator.clipboard.writeText(buildCodexSkillset());
+    setSkillsetCopied(true);
+    window.setTimeout(() => setSkillsetCopied(false), 1800);
+  }
+
+  async function copyStartInstruction() {
+    await navigator.clipboard.writeText(buildCodexStartInstruction());
+    setStartCopied(true);
+    window.setTimeout(() => setStartCopied(false), 1800);
   }
 
   return (
@@ -881,6 +1018,36 @@ export default function Home() {
                     <input value={data.ctaUrl} onChange={(e) => update("ctaUrl", e.target.value)} placeholder="https://example.com/contact" inputMode="url" />
                   </label>
                 </div>
+                <section className="external-links-editor" aria-labelledby="external-links-title">
+                  <div className="external-links-heading">
+                    <div><h3 id="external-links-title">店舗・SNS・外部リンク</h3><p>地図、Instagram、LINE、予約ページなどを必要な数だけ登録できます。</p></div>
+                    <span>任意・複数可</span>
+                  </div>
+                  {(data.externalLinks ?? []).length === 0 ? (
+                    <div className="external-links-empty">道案内やSNSがある場合は「リンクを追加」を押してください。</div>
+                  ) : (
+                    <div className="external-link-list">
+                      {(data.externalLinks ?? []).map((link, index) => (
+                        <div className="external-link-row" key={link.id}>
+                          <label>種類
+                            <select value={link.type} onChange={(event) => changeExternalLink(link.id, "type", event.target.value)}>
+                              {externalLinkTypes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                            </select>
+                          </label>
+                          <label>表示名
+                            <input value={link.label} onChange={(event) => changeExternalLink(link.id, "label", event.target.value)} placeholder={externalLinkTypeLabel(link.type)} />
+                          </label>
+                          <label>URL
+                            <input value={link.url} onChange={(event) => changeExternalLink(link.id, "url", event.target.value)} placeholder="https://..." inputMode="url" />
+                          </label>
+                          <button type="button" className="remove-link" onClick={() => removeExternalLink(link.id)} aria-label={`${index + 1}件目のリンクを削除`}>×</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <button type="button" className="add-link" onClick={addExternalLink}>＋ リンクを追加</button>
+                  <p className="external-links-note">地図はアクセス案内、SNSはプロフィールやフッター、予約ページは目的に応じてCTA付近へ配置されます。</p>
+                </section>
               </div>
             </div>
           )}
@@ -963,6 +1130,7 @@ export default function Home() {
                     <div><dt>お客さま像</dt><dd>{data.personaMode === "ai" ? "商品情報からCodexが推測" : "自分で選んだ内容を使用"}</dd></div>
                     <div><dt>ゴール</dt><dd>{goalAnswer || "未選択"}</dd></div>
                     <div><dt>CTA</dt><dd>{ctaAnswer || "未選択"}</dd></div>
+                    <div><dt>追加リンク</dt><dd>{(data.externalLinks ?? []).filter((link) => link.url.trim()).length > 0 ? `${(data.externalLinks ?? []).filter((link) => link.url.trim()).length}件` : "なし"}</dd></div>
                   </dl>
                 </div>
                 <div className="review-card direction-card">
@@ -980,7 +1148,7 @@ export default function Home() {
                   {required.length > 0 ? (
                     <p>未入力：{required.map(([label]) => label).join("、")}</p>
                   ) : (
-                    <p>6ファイルをまとめたZIPをこの端末に保存します。入力内容は外部へ送信されません。</p>
+                    <p>9ファイルをまとめたZIPをこの端末に保存します。入力内容は外部へ送信されません。</p>
                   )}
                 </div>
                 <button className="download-button" type="button" disabled={required.length > 0} onClick={downloadProject}>
@@ -991,24 +1159,31 @@ export default function Home() {
               <section className="after-export" aria-labelledby="after-export-title">
                 <div className="after-export-heading">
                   <span className="review-label">AFTER EXPORT</span>
-                  <h2 id="after-export-title">ZIPができたら、次はこの3ステップです。</h2>
-                  <p>ZIPの中には、個別リポジトリのURLとCodexがLPを制作するために必要な情報がひとまとめになっています。</p>
+                  <h2 id="after-export-title">最初に制作ルールをセットしてから、フォルダを共有します。</h2>
+                  <p>フォルダを共有するだけでは作業開始になりません。次の4ステップなら、Codexが迷わず実装を始められます。</p>
                 </div>
                 <ol className="after-export-steps">
-                  <li><span>1</span><div><strong>ZIPを展開する</strong><p>ダウンロードしたZIPを右クリックし、「すべて展開」を選びます。ZIPのままではなく、展開後のフォルダを使います。</p></div></li>
-                  <li><span>2</span><div><strong>設計図をCodexで開く</strong><p>展開したフォルダをCodexで開きます。制作先リポジトリのURLは project.json に保存済みです。</p></div></li>
-                  <li><span>3</span><div><strong>index.htmlでプレビュー</strong><p>Codexが個別リポジトリへLPを実装し、ローカルの index.html を表示確認してからcommit・pushします。</p></div></li>
+                  <li><span>1</span><div><strong>制作ルールをセット</strong><p>下の「① 制作ルールをコピー」を押し、新しいCodexタスクへ貼り付けて送信します。</p></div></li>
+                  <li><span>2</span><div><strong>ZIPを展開して共有</strong><p>ZIPを「すべて展開」し、展開後のフォルダを同じCodexタスクへ共有します。</p></div></li>
+                  <li><span>3</span><div><strong>開始文を送る</strong><p>下の「② 開始文をコピー」を押し、フォルダと一緒に貼り付けて送信します。</p></div></li>
+                  <li><span>4</span><div><strong>index.htmlを確認</strong><p>Codexが実装を進め、ローカルの index.html を確認してからcommit・pushします。</p></div></li>
                 </ol>
-                <div className="codex-instruction">
-                  <p>このフォルダの AGENTS.md と project.json を先に読んでください。project.json の repositoryUrl にある個別リポジトリへ、BRIEF.md に沿ったLPを実装してください。ChatGPT Sites・OpenAI Sites・*.chatgpt.site は使わず、.openai/hosting.json も作成しないでください。入口はリポジトリ直下の index.html にし、相対パスで動く静的サイトとして制作してください。リポジトリ直下で python -m http.server 8000 を実行し、http://localhost:8000/index.html でプレビューしてください。必要な画像は assets/IMAGE_BRIEF.md を参照して生成・配置し、最後に表示とCTAを確認してcommit・pushしてください。</p>
-                  <button type="button" onClick={copyCodexInstruction}>{instructionCopied ? "コピーしました" : "依頼文をコピー"}</button>
+                <div className="codex-copy-grid">
+                  <div className="codex-instruction setup-instruction">
+                    <div><strong>① 先に制作ルールをセット</strong><p>新しいCodexタスクへ貼り付けて送信します。LP制作の役割・禁止事項・完了条件を先に共有します。</p></div>
+                    <button type="button" onClick={copySkillset}>{skillsetCopied ? "コピーしました" : "① 制作ルールをコピー"}</button>
+                  </div>
+                  <div className="codex-instruction start-instruction">
+                    <div><strong>② フォルダ共有後に作業開始</strong><p>展開したフォルダを共有するとき、この開始文も一緒に貼り付けて送信します。</p></div>
+                    <button type="button" onClick={copyStartInstruction}>{startCopied ? "コピーしました" : "② 開始文をコピー"}</button>
+                  </div>
                 </div>
               </section>
 
               {downloaded && (
                 <div className="success-message" role="status">
                   <strong>書き出しが完了しました。</strong>
-                  <span>上の3ステップに沿って、ZIPを展開してCodexで開いてください。</span>
+                  <span>まず「① 制作ルールをコピー」から始めてください。</span>
                 </div>
               )}
             </div>

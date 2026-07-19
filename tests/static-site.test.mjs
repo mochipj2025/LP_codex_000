@@ -20,4 +20,11 @@ test("builds a GitHub Pages-ready static site", () => {
   assert.match(appSource, /infer-with-codex/);
   assert.match(appSource, /商品情報からAIにおまかせ/);
   assert.match(appSource, /推測した内容は制作上の仮説/);
+  assert.match(appSource, /CODEX_SKILLSET\.md/);
+  assert.match(appSource, /CODEX_START_PROMPT\.txt/);
+  assert.match(appSource, /制作ルールをセット/);
+  assert.match(appSource, /LP制作を開始してください/);
+  assert.match(appSource, /店舗・SNS・外部リンク/);
+  assert.match(appSource, /externalLinks/);
+  assert.match(appSource, /地図・アクセス/);
 });
