@@ -229,15 +229,21 @@ button { color: inherit; }
 .after-export { margin-top: 20px; padding: 30px; border: 1px solid #ead8c3; border-radius: 15px; background: var(--card); }
 .after-export-heading h2 { margin: 10px 0 7px; font-size: 21px; letter-spacing: -.02em; }
 .after-export-heading > p { margin: 0; color: #6d7571; font-size: 14px; line-height: 1.7; }
-.after-export-steps { margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; list-style: none; }
+.after-export-steps { margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; list-style: none; }
 .after-export-steps li { min-width: 0; padding: 17px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #eadfce; border-radius: 12px; background: #fffaf0; }
 .after-export-steps li > span { width: 28px; height: 28px; flex: 0 0 auto; display: grid; place-items: center; color: #3d2a24; background: var(--sky); border-radius: 50%; font-size: 13px; font-weight: 900; }
 .after-export-steps strong { display: block; margin: 3px 0 7px; font-size: 14px; }
 .after-export-steps p { margin: 0; color: #71655e; font-size: 12px; line-height: 1.65; }
+.codex-copy-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .codex-instruction { margin-top: 14px; padding: 16px 16px 16px 18px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; color: #f9eee8; background: var(--deep); border-radius: 12px; }
+.codex-copy-grid .codex-instruction { grid-template-columns: 1fr; align-content: space-between; }
+.codex-instruction strong { display: block; margin-bottom: 7px; color: white; font-size: 14px; }
 .codex-instruction p { margin: 0; font-size: 13px; line-height: 1.7; }
 .codex-instruction button { min-width: 124px; min-height: 42px; padding: 0 14px; color: #3d2a24; border: 0; border-radius: 9px; background: var(--sky); font-size: 12px; font-weight: 800; cursor: pointer; }
+.codex-copy-grid .codex-instruction button { width: 100%; }
+.start-instruction button { background: var(--accent); }
 .codex-instruction button:hover { background: #c5ebff; }
+.start-instruction button:hover { background: var(--accent-dark); }
 
 .actionbar { position: fixed; z-index: 4; right: 0; bottom: 0; width: calc(100% - 270px); height: 76px; padding: 0 52px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-top: 1px solid #e4d2bf; background: rgba(255,248,233,.94); backdrop-filter: blur(12px); }
 .actionbar > span { color: #6f7672; font-size: 12px; }
@@ -304,6 +310,7 @@ button { color: inherit; }
   .success-message { align-items: flex-start; flex-direction: column; gap: 4px; }
   .after-export { padding: 23px 19px; }
   .after-export-steps { grid-template-columns: 1fr; }
+  .codex-copy-grid { grid-template-columns: 1fr; }
   .codex-instruction { grid-template-columns: 1fr; }
   .codex-instruction button { width: 100%; }
 }
