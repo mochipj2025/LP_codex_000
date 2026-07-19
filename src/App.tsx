@@ -426,6 +426,13 @@ function buildFiles(data: ProjectData) {
       lpType: { id: lpType.id, name: lpType.title, recommendedSections: lpType.structure },
       mood: { id: mood.id, name: mood.title, description: mood.direction, colors: mood.colors },
     },
+    delivery: {
+      mode: "repository-static-site",
+      previewEntry: "index.html",
+      previewCommand: "python -m http.server 8000",
+      forbiddenPlatforms: ["ChatGPT Sites", "*.chatgpt.site"],
+      forbiddenFiles: [".openai/hosting.json"],
+    },
   };
 
   const brief = `# ${normalize(data.projectName)} — LP制作ブリーフ
@@ -480,6 +487,14 @@ ${normalize(notes)}
 - リポジトリ直下の index.html を公開入口にする。
 - CSS・JavaScript・画像は相対パスで参照し、静的ホスティングで表示できる構成にする。
 - 完成後は変更をcommitし、指定リポジトリへpushする。
+
+## Non-negotiable delivery rules
+- ChatGPT Sites、OpenAI Sites、または *.chatgpt.site へ公開しない。
+- .openai/hosting.json を作成せず、Sites用の初期化・ビルド・デプロイを実行しない。
+- プレビュー入口は必ずリポジトリ直下の index.html とする。
+- index.html からCSS・JavaScript・画像を相対パスで読み込み、特定サービスのURLへ依存させない。
+- プレビュー時はリポジトリ直下で \`python -m http.server 8000\` を実行し、\`http://localhost:8000/index.html\` を開く。
+- フレームワークを使う場合も、最終成果物としてルートの index.html から確認できる静的ファイルを用意する。
 
 ## Source of truth
 1. project.json — 機械可読な確定情報
@@ -553,9 +568,11 @@ LPmakerから書き出されたLP制作プロジェクトです。
 ## 制作先
 - リポジトリ: ${normalize(data.repositoryUrl)}
 - 公開入口: index.html
+- プレビュー: リポジトリ直下で \`python -m http.server 8000\` → \`http://localhost:8000/index.html\`
+- 使用禁止: ChatGPT Sites / OpenAI Sites / *.chatgpt.site
 
 ## Codexへの依頼文
-「このフォルダの AGENTS.md と project.json を先に読んでください。project.json の repositoryUrl にある個別リポジトリへ、BRIEF.md に沿ったLPを実装してください。入口はリポジトリ直下の index.html にし、必要な画像は assets/IMAGE_BRIEF.md を参照して生成・配置してください。最後に表示とCTAを確認し、commit・pushしてください。」
+「このフォルダの AGENTS.md と project.json を先に読んでください。project.json の repositoryUrl にある個別リポジトリへ、BRIEF.md に沿ったLPを実装してください。ChatGPT Sites・OpenAI Sites・*.chatgpt.site は使わず、.openai/hosting.json も作成しないでください。入口はリポジトリ直下の index.html にし、相対パスで動く静的サイトとして制作してください。リポジトリ直下で python -m http.server 8000 を実行し、http://localhost:8000/index.html でプレビューしてください。必要な画像は assets/IMAGE_BRIEF.md を参照して生成・配置し、最後に表示とCTAを確認してcommit・pushしてください。」
 
 ## フォルダ構成
 - project.json: 確定情報と制作方針
@@ -653,7 +670,7 @@ export default function Home() {
   }
 
   async function copyCodexInstruction() {
-    const instruction = "このフォルダの AGENTS.md と project.json を先に読んでください。project.json の repositoryUrl にある個別リポジトリへ、BRIEF.md に沿ったLPを実装してください。入口はリポジトリ直下の index.html にし、必要な画像は assets/IMAGE_BRIEF.md を参照して生成・配置してください。最後に表示とCTAを確認し、commit・pushしてください。";
+    const instruction = "このフォルダの AGENTS.md と project.json を先に読んでください。project.json の repositoryUrl にある個別リポジトリへ、BRIEF.md に沿ったLPを実装してください。ChatGPT Sites・OpenAI Sites・*.chatgpt.site は使わず、.openai/hosting.json も作成しないでください。入口はリポジトリ直下の index.html にし、相対パスで動く静的サイトとして制作してください。リポジトリ直下で python -m http.server 8000 を実行し、http://localhost:8000/index.html でプレビューしてください。必要な画像は assets/IMAGE_BRIEF.md を参照して生成・配置し、最後に表示とCTAを確認してcommit・pushしてください。";
     await navigator.clipboard.writeText(instruction);
     setInstructionCopied(true);
     window.setTimeout(() => setInstructionCopied(false), 1800);
@@ -721,6 +738,11 @@ export default function Home() {
                   <span className="review-label">BEFORE INPUT</span>
                   <h2 id="repo-setup-title">このLP専用のリポジトリを先に用意します。</h2>
                   <p>GitHubなどで空のリポジトリを1つ作り、取得したURLを貼り付けてください。CodexはこのURLを制作先として使い、リポジトリ直下の index.html を公開入口にします。</p>
+                  <div className="static-output-note">
+                    <span><strong>制作先</strong> 個別リポジトリ</span>
+                    <span><strong>プレビュー</strong> index.html</span>
+                    <span><strong>使用しない</strong> ChatGPT Sites</span>
+                  </div>
                   <ol>
                     <li>新しい空のリポジトリを作る</li>
                     <li>リポジトリのURLをコピーする</li>
@@ -919,10 +941,10 @@ export default function Home() {
                 <ol className="after-export-steps">
                   <li><span>1</span><div><strong>ZIPを展開する</strong><p>ダウンロードしたZIPを右クリックし、「すべて展開」を選びます。ZIPのままではなく、展開後のフォルダを使います。</p></div></li>
                   <li><span>2</span><div><strong>設計図をCodexで開く</strong><p>展開したフォルダをCodexで開きます。制作先リポジトリのURLは project.json に保存済みです。</p></div></li>
-                  <li><span>3</span><div><strong>index.htmlの制作を依頼</strong><p>下の依頼文を送ると、Codexが個別リポジトリへLPを実装し、commit・pushまで進めます。</p></div></li>
+                  <li><span>3</span><div><strong>index.htmlでプレビュー</strong><p>Codexが個別リポジトリへLPを実装し、ローカルの index.html を表示確認してからcommit・pushします。</p></div></li>
                 </ol>
                 <div className="codex-instruction">
-                  <p>このフォルダの AGENTS.md と project.json を先に読んでください。project.json の repositoryUrl にある個別リポジトリへ、BRIEF.md に沿ったLPを実装してください。入口はリポジトリ直下の index.html にし、必要な画像は assets/IMAGE_BRIEF.md を参照して生成・配置してください。最後に表示とCTAを確認し、commit・pushしてください。</p>
+                  <p>このフォルダの AGENTS.md と project.json を先に読んでください。project.json の repositoryUrl にある個別リポジトリへ、BRIEF.md に沿ったLPを実装してください。ChatGPT Sites・OpenAI Sites・*.chatgpt.site は使わず、.openai/hosting.json も作成しないでください。入口はリポジトリ直下の index.html にし、相対パスで動く静的サイトとして制作してください。リポジトリ直下で python -m http.server 8000 を実行し、http://localhost:8000/index.html でプレビューしてください。必要な画像は assets/IMAGE_BRIEF.md を参照して生成・配置し、最後に表示とCTAを確認してcommit・pushしてください。</p>
                   <button type="button" onClick={copyCodexInstruction}>{instructionCopied ? "コピーしました" : "依頼文をコピー"}</button>
                 </div>
               </section>

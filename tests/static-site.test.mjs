@@ -10,4 +10,9 @@ test("builds a GitHub Pages-ready static site", () => {
   const html = readFileSync("docs/index.html", "utf8");
   assert.match(html, /<title>LPmaker/);
   assert.match(html, /\/LP_codex_000\/assets\//);
+
+  const appSource = readFileSync("src/App.tsx", "utf8");
+  assert.match(appSource, /forbiddenPlatforms/);
+  assert.match(appSource, /ChatGPT Sites、OpenAI Sites/);
+  assert.match(appSource, /http:\/\/localhost:8000\/index\.html/);
 });
