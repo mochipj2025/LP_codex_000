@@ -5,6 +5,7 @@ import "./style.css";
 
 type ProjectData = {
   repositoryUrl: string;
+  personaMode: "ai" | "manual";
   projectName: string;
   brandName: string;
   offeringType: string;
@@ -32,6 +33,7 @@ type ProjectData = {
 
 const initialData: ProjectData = {
   repositoryUrl: "",
+  personaMode: "ai",
   projectName: "",
   brandName: "",
   offeringType: "",
@@ -392,8 +394,14 @@ function buildFiles(data: ProjectData) {
   const offering = answerText(data.offeringType, offeringOptions, data.offering);
   const audience = answerText(data.audienceTypes, audienceOptions, data.audience);
   const goal = answerText(data.goalType, goalOptions, data.goal);
-  const problems = answerText(data.problemTypes, problemOptions, data.problems);
-  const benefits = answerText(data.benefitTypes, benefitOptions, data.benefits);
+  const manualProblems = answerText(data.problemTypes, problemOptions, data.problems);
+  const manualBenefits = answerText(data.benefitTypes, benefitOptions, data.benefits);
+  const problems = data.personaMode === "ai"
+    ? `Codexが商品・サービス、想定ユーザー、LPのゴールから仮説を作成${data.problems.trim() ? `。分かっていること：${data.problems.trim()}` : ""}`
+    : manualProblems;
+  const benefits = data.personaMode === "ai"
+    ? "Codexが推測したペルソナに合う、利用後の変化を仮説として作成"
+    : manualBenefits;
   const proof = answerText(data.proofTypes, proofOptions, data.proof);
   const offer = answerText(data.offerTypes, offerOptions, data.offer);
   const ctaLabel = answerText(data.ctaType, ctaOptions, data.ctaLabel);
@@ -414,6 +422,13 @@ function buildFiles(data: ProjectData) {
       audience: normalize(audience),
       primaryGoal: normalize(goal),
       cta: { label: normalize(ctaLabel), url: normalize(data.ctaUrl) },
+    },
+    persona: {
+      mode: data.personaMode === "ai" ? "infer-with-codex" : "manual",
+      inferenceSource: data.personaMode === "ai" ? ["offering", "audience", "primaryGoal", "knownNotes"] : [],
+      instruction: data.personaMode === "ai"
+        ? "商品・サービス、想定ユーザー、LPのゴールからペルソナを仮説生成する。推測を確認済み事実として断定しない。"
+        : "入力された悩みと期待する変化を優先してペルソナを整理する。",
     },
     content: {
       customerProblems: normalize(problems),
@@ -446,6 +461,9 @@ function buildFiles(data: ProjectData) {
 - ブランド／運営者: ${normalize(data.brandName)}
 
 ## 顧客理解
+### ペルソナの作成方法
+${data.personaMode === "ai" ? "Codexにおまかせ。商品・サービス、想定ユーザー、LPのゴールから仮説を作成する。" : "入力内容から作成する。"}
+
 ### 抱えている悩み
 ${normalize(problems)}
 
@@ -511,6 +529,9 @@ ${normalize(notes)}
 - モバイルを含むレスポンシブ、キーボード操作、十分なコントラストを確認する。
 - 必要な画像は IMAGE_BRIEF.md に沿って生成または選定し、適切な代替テキストを付ける。
 - 実装後にリンク、CTA、表示崩れ、ビルドを確認する。
+- persona.mode が infer-with-codex の場合は、商品・サービス、想定ユーザー、LPのゴールから1〜2名のペルソナを仮説生成する。
+- AI推測したペルソナ・悩み・利用後の変化は制作上の仮説として扱い、実績・数値・顧客の発言などの確認済み事実として断定しない。
+- persona.mode が manual の場合は、入力された悩みと変化を優先する。
 `;
 
   const copy = `# 掲載コピー素材
@@ -806,15 +827,46 @@ export default function Home() {
               <div className="form-card">
                 <div className="section-title">
                   <span>02</span>
-                  <div><h2>お客さまの悩みと、届けたい変化</h2><p>LPのストーリーに必要な4つの材料を、順番に選びます</p></div>
+                  <div><h2>想定するお客さま像</h2><p>考えるのが大変なら、商品情報からCodexに推測してもらえます</p></div>
                 </div>
-                <div className="content-flow-guide" aria-label="入力する内容の流れ">
-                  <span><b>1</b>利用前の悩み</span><i>→</i><span><b>2</b>利用後の変化</span><i>→</i><span><b>3</b>安心できる理由</span><i>→</i><span><b>4</b>最初の一歩</span>
+
+                <div className="persona-mode-picker" role="radiogroup" aria-label="お客さま像の作り方">
+                  <button type="button" role="radio" aria-checked={data.personaMode === "ai"} className={data.personaMode === "ai" ? "selected" : ""} onClick={() => update("personaMode", "ai")}>
+                    <span className="mode-icon">AI</span>
+                    <span><strong>商品情報からAIにおまかせ</strong><small>考えなくてOK・おすすめ</small></span>
+                  </button>
+                  <button type="button" role="radio" aria-checked={data.personaMode === "manual"} className={data.personaMode === "manual" ? "selected" : ""} onClick={() => update("personaMode", "manual")}>
+                    <span className="mode-icon">✎</span>
+                    <span><strong>自分で選んで入力する</strong><small>分かっている場合はこちら</small></span>
+                  </button>
                 </div>
-                <SelectionQuestion title="1. お客さまは、どんな状態でこの商品・サービスを探しますか？" description="利用する前の困りごとです。実際によく聞く相談に近いものを選んでください。" multiple options={problemOptions} value={data.problemTypes} onChange={(value) => update("problemTypes", value as string[])} details={data.problems} onDetailsChange={(value) => update("problems", value)} placeholder="例：毎回説明に時間がかかる、問い合わせが月に数件しかない" />
-                <SelectionQuestion title="2. 利用後、お客さまにどうなってほしいですか？" description="商品・サービスを使った後に得られる結果や、感じてほしい気持ちを選びます。" multiple options={benefitOptions} value={data.benefitTypes} onChange={(value) => update("benefitTypes", value as string[])} details={data.benefits} onDetailsChange={(value) => update("benefits", value)} placeholder="例：作業時間が半分になる、自信を持って判断できる" />
-                <SelectionQuestion title="3. 申し込む前の不安を減らせる材料はありますか？" description="実際にLPへ掲載できる事例・声・数字などを選びます。ない場合は「まだ用意できていない」で大丈夫です。" multiple options={proofOptions} value={data.proofTypes} onChange={(value) => update("proofTypes", value as string[])} details={data.proof} onDetailsChange={(value) => update("proof", value)} placeholder="例：導入120社、お客さまの感想3件、資格名、掲載メディア名" />
-                <SelectionQuestion title="4. お客さまが最初の一歩を踏み出しやすくなる案内はありますか？" description="無料相談・お試し・資料など、いきなり購入しなくても試せるものを選びます。" multiple options={offerOptions} value={data.offerTypes} onChange={(value) => update("offerTypes", value as string[])} details={data.offer} onDetailsChange={(value) => update("offer", value)} placeholder="例：30分無料相談、7日間無料、今月末まで10%オフ" />
+
+                {data.personaMode === "ai" ? (
+                  <div className="ai-persona-panel">
+                    <div className="ai-persona-heading"><span>AI</span><div><strong>ZIPをCodexで開いた後に推測します</strong><p>商品・サービス、届けたい相手、LPのゴールを組み合わせて、ペルソナと悩みを仮説として作ります。</p></div></div>
+                    <dl>
+                      <div><dt>商品・サービス</dt><dd>{offeringAnswer || "前の項目で選んでください"}</dd></div>
+                      <div><dt>届けたい相手</dt><dd>{audienceAnswer || "前の項目で選んでください"}</dd></div>
+                      <div><dt>LPのゴール</dt><dd>{goalAnswer || "前の項目で選んでください"}</dd></div>
+                    </dl>
+                    <label>分かっていることだけ補足 <span>任意</span>
+                      <textarea value={data.problems} onChange={(event) => update("problems", event.target.value)} placeholder="例：女性の利用が多い、初めて購入する人が多い、価格より安心感を重視する" rows={3} />
+                    </label>
+                    <p className="ai-caution">推測した内容は制作上の仮説として扱い、実績や顧客の発言として断定しません。</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="content-flow-guide" aria-label="入力する内容の流れ">
+                      <span><b>1</b>利用前の悩み</span><i>→</i><span><b>2</b>利用後の変化</span>
+                    </div>
+                    <SelectionQuestion title="1. この商品・サービスが解決する悩みはどれですか？" description="商品・サービスを利用する前に、お客さまが困っていることを選んでください。" multiple options={problemOptions} value={data.problemTypes} onChange={(value) => update("problemTypes", value as string[])} details={data.problems} onDetailsChange={(value) => update("problems", value)} placeholder="例：毎回説明に時間がかかる、問い合わせが月に数件しかない" />
+                    <SelectionQuestion title="2. 利用後、お客さまにどうなってほしいですか？" description="商品・サービスを使った後に得られる結果や、感じてほしい気持ちを選びます。" multiple options={benefitOptions} value={data.benefitTypes} onChange={(value) => update("benefitTypes", value as string[])} details={data.benefits} onDetailsChange={(value) => update("benefits", value)} placeholder="例：作業時間が半分になる、自信を持って判断できる" />
+                  </>
+                )}
+
+                <div className="fact-divider"><span>AIが推測できない事実だけ教えてください</span><p>実績・資格・料金・特典は、実際に掲載できるものを選びます。</p></div>
+                <SelectionQuestion title="掲載できる安心材料はありますか？" description="実際にLPへ掲載できる事例・声・数字などを選びます。ない場合は「まだ用意できていない」で大丈夫です。" multiple options={proofOptions} value={data.proofTypes} onChange={(value) => update("proofTypes", value as string[])} details={data.proof} onDetailsChange={(value) => update("proof", value)} placeholder="例：導入120社、お客さまの感想3件、資格名、掲載メディア名" />
+                <SelectionQuestion title="最初の一歩を踏み出しやすくする案内はありますか？" description="無料相談・お試し・資料など、いきなり購入しなくても試せるものを選びます。" multiple options={offerOptions} value={data.offerTypes} onChange={(value) => update("offerTypes", value as string[])} details={data.offer} onDetailsChange={(value) => update("offer", value)} placeholder="例：30分無料相談、7日間無料、今月末まで10%オフ" />
               </div>
 
               <div className="form-card">
@@ -908,6 +960,7 @@ export default function Home() {
                   <dl>
                     <div><dt>制作先</dt><dd>{data.repositoryUrl || "未入力"}</dd></div>
                     <div><dt>想定ユーザー</dt><dd>{audienceAnswer || "未選択"}</dd></div>
+                    <div><dt>お客さま像</dt><dd>{data.personaMode === "ai" ? "商品情報からCodexが推測" : "自分で選んだ内容を使用"}</dd></div>
                     <div><dt>ゴール</dt><dd>{goalAnswer || "未選択"}</dd></div>
                     <div><dt>CTA</dt><dd>{ctaAnswer || "未選択"}</dd></div>
                   </dl>
