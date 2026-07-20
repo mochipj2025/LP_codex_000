@@ -24,6 +24,78 @@ body {
 button, input, textarea { font: inherit; }
 button { color: inherit; }
 
+/* LPmaker overview */
+.guide-page { min-height: 100vh; overflow: hidden; background: var(--paper); }
+.guide-header { width: min(1240px, calc(100% - 72px)); height: 92px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+.guide-brand { color: var(--deep); }
+.guide-header-note { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .06em; }
+.guide-hero { width: min(1240px, calc(100% - 72px)); min-height: 590px; margin: 0 auto; padding: 82px 0 76px; display: grid; grid-template-columns: .92fr 1.08fr; align-items: center; gap: 74px; }
+.guide-hero-copy h1 { margin: 0; font: 400 clamp(48px, 5.7vw, 78px)/1.08 Georgia, "Yu Mincho", serif; letter-spacing: -.055em; }
+.guide-hero-copy > p { max-width: 590px; margin: 28px 0 0; color: var(--muted); font-size: 16px; line-height: 1.9; }
+.guide-actions { margin-top: 35px; display: flex; align-items: center; gap: 27px; }
+.guide-actions > a { color: var(--deep); font-size: 13px; font-weight: 800; text-underline-offset: 5px; }
+.guide-start { min-height: 58px; padding: 0 24px; display: inline-flex; align-items: center; justify-content: center; gap: 30px; color: #3f2b25; border: 0; border-radius: 12px; background: var(--accent); box-shadow: 0 8px 0 rgba(146,79,22,.16); font-size: 15px; font-weight: 900; cursor: pointer; transition: .2s ease; }
+.guide-start:hover { background: #f6a746; transform: translateY(-2px); box-shadow: 0 10px 0 rgba(146,79,22,.14); }
+.guide-hero-visual { position: relative; min-height: 410px; display: grid; grid-template-columns: 1fr 84px 1fr; align-items: center; isolation: isolate; }
+.guide-hero-visual::before { content: ""; position: absolute; z-index: -1; width: 460px; height: 360px; right: 15px; top: 25px; background: #ffedc6; border-radius: 51% 49% 45% 55% / 54% 43% 57% 46%; transform: rotate(-5deg); }
+.guide-tool-card { min-height: 245px; padding: 28px 25px; display: flex; flex-direction: column; border-radius: 22px; box-shadow: 0 14px 0 rgba(58,34,27,.1); }
+.guide-tool-card > span { font: 800 10px/1 ui-monospace, monospace; letter-spacing: .1em; }
+.guide-tool-card strong { margin: 52px 0 13px; font: 400 34px/1 Georgia, "Yu Mincho", serif; }
+.guide-tool-card small { font-size: 13px; font-weight: 700; line-height: 1.65; }
+.guide-tool-maker { align-self: start; color: var(--deep); background: #fffdf7; border: 1px solid #e8d8c3; transform: rotate(-2deg); }
+.guide-tool-maker > span { color: var(--accent-dark); }
+.guide-tool-codex { align-self: end; color: white; background: var(--deep); transform: rotate(2deg); }
+.guide-tool-codex > span { color: var(--sky); }
+.guide-tool-codex small { color: #edd6c7; }
+.guide-file { position: relative; z-index: 2; width: 72px; height: 82px; display: grid; place-items: center; color: var(--deep); background: var(--sky); border: 2px solid var(--deep); border-radius: 10px; box-shadow: 6px 7px 0 rgba(58,34,27,.16); transform: rotate(6deg); }
+.guide-file::before, .guide-file::after { content: ""; position: absolute; top: 37px; width: 28px; height: 2px; background: var(--deep); }
+.guide-file::before { left: -31px; }.guide-file::after { right: -31px; }
+.guide-file i { position: absolute; left: 17px; right: 17px; height: 2px; background: rgba(67,43,37,.25); }
+.guide-file i:first-child { top: 21px; }.guide-file i:nth-child(2) { top: 29px; }
+.guide-file b { padding-top: 20px; font: 900 13px/1 ui-monospace, monospace; }
+.guide-result { position: absolute; right: -11px; bottom: 0; width: 128px; height: 96px; padding: 17px; color: var(--deep); background: white; border: 2px solid var(--deep); border-radius: 11px; box-shadow: 8px 9px 0 var(--blush); transform: rotate(-3deg); }
+.guide-result span { width: 70%; height: 5px; margin-bottom: 7px; display: block; background: #efd9c1; border-radius: 10px; }
+.guide-result span:nth-child(2) { width: 94%; }.guide-result span:nth-child(3) { width: 55%; }
+.guide-result b { position: absolute; right: 14px; bottom: 12px; font: 900 15px/1 ui-monospace, monospace; }
+
+.workflow-section { padding: 92px max(36px, calc((100vw - 1240px) / 2)) 100px; color: #fff8ed; background: var(--deep); }
+.workflow-heading { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 50px; }
+.workflow-heading .kicker { color: var(--sky); }
+.workflow-heading h2 { margin: 0; font: 400 clamp(36px, 4vw, 56px)/1.12 Georgia, "Yu Mincho", serif; letter-spacing: -.04em; }
+.workflow-heading > p { max-width: 540px; margin: 0 0 5px auto; color: #e5cbbb; font-size: 14px; line-height: 1.85; }
+.workflow-map { position: relative; margin: 62px 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; list-style: none; }
+.workflow-map::before { content: ""; position: absolute; left: 9%; right: 9%; top: 75px; height: 2px; background: repeating-linear-gradient(90deg, rgba(150,215,250,.55) 0 7px, transparent 7px 13px); }
+.workflow-map li { position: relative; min-width: 0; padding: 17px 16px 24px; border: 1px solid rgba(255,255,255,.12); border-radius: 17px; background: rgba(255,255,255,.035); }
+.workflow-map li::after { content: "→"; position: absolute; z-index: 2; right: -13px; top: 65px; width: 26px; height: 26px; display: grid; place-items: center; color: var(--deep); background: var(--sky); border-radius: 50%; font-size: 12px; font-weight: 900; }
+.workflow-map li:last-child::after { display: none; }
+.workflow-number { color: #d5b5a1; font: 800 10px/1 ui-monospace, monospace; }
+.workflow-icon { position: relative; z-index: 1; width: 76px; height: 76px; margin: 14px 0 23px; display: grid; place-items: center; color: var(--deep); background: #fff3d5; border: 1px solid rgba(255,255,255,.3); border-radius: 18px; box-shadow: 0 7px 0 rgba(28,15,12,.14); }
+.workflow-map small { color: var(--sky); font: 800 10px/1 ui-monospace, monospace; letter-spacing: .1em; }
+.workflow-map h3 { min-height: 50px; margin: 10px 0 7px; color: white; font-size: 17px; line-height: 1.45; }
+.workflow-map p { margin: 0; color: #dfc5b5; font-size: 12px; line-height: 1.7; }
+.repo-icon { align-content: center; gap: 5px; }.repo-icon i { width: 38px; height: 7px; display: block; border: 2px solid var(--deep); border-radius: 3px; }.repo-icon i::before { content: ""; width: 4px; height: 4px; margin-left: 4px; display: block; background: var(--accent); border-radius: 50%; }
+.choice-icon { padding: 14px; grid-template-columns: 1fr 1fr; gap: 5px; }.choice-icon i { height: 20px; display: grid; place-items: center; border: 1px solid var(--deep); border-radius: 4px; font-size: 10px; font-style: normal; font-weight: 900; }.choice-icon i:nth-child(3) { grid-column: 1 / -1; }
+.zip-icon { font: 900 17px/1 ui-monospace, monospace; }.zip-icon span { position: absolute; right: 11px; bottom: 8px; color: var(--accent-dark); font-size: 18px; }
+.codex-icon { color: white; background: var(--deep-2); border-color: #98715f; font: 400 32px/1 Georgia, serif; }.codex-icon span { position: absolute; right: 9px; bottom: 7px; color: var(--sky); font: 900 15px/1 sans-serif; }
+.publish-icon { align-content: center; gap: 6px; }.publish-icon i { width: 43px; height: 4px; display: block; background: #e0c8af; border-radius: 4px; }.publish-icon i:nth-child(2) { width: 30px; }.publish-icon b { position: absolute; right: 8px; bottom: 7px; width: 23px; height: 23px; display: grid; place-items: center; color: var(--deep); background: var(--sky); border-radius: 50%; font-size: 11px; }
+
+.github-guide { width: min(1060px, calc(100% - 72px)); margin: 90px auto 0; padding: 44px; display: grid; grid-template-columns: 1fr .9fr; align-items: center; gap: 60px; border: 1px solid #d8e7ed; border-radius: 24px; background: #edf8fd; box-shadow: 0 11px 0 rgba(59,124,160,.08); }
+.github-guide-copy h2 { margin: 0; font: 400 clamp(34px, 4vw, 50px)/1.1 Georgia, "Yu Mincho", serif; letter-spacing: -.045em; }
+.github-guide-copy > p { margin: 22px 0 0; color: #5e6d70; font-size: 14px; line-height: 1.85; }.github-guide-copy > p strong { color: var(--deep); }
+.github-links { margin-top: 24px; display: grid; gap: 8px; }
+.github-links a { min-height: 46px; padding: 0 15px; display: flex; align-items: center; justify-content: space-between; color: var(--deep); border: 1px solid #bfdae6; border-radius: 10px; background: rgba(255,255,255,.72); font-size: 12px; font-weight: 800; text-decoration: none; transition: .18s; }
+.github-links a:hover { border-color: #78bddc; background: white; transform: translateX(3px); }.github-links a span { color: #3d93bc; font-size: 15px; }
+.github-mini-flow { margin: 0; padding: 0; display: grid; gap: 9px; list-style: none; }
+.github-mini-flow li { min-height: 76px; padding: 13px 16px; display: flex; align-items: center; gap: 15px; color: var(--deep); border: 1px solid #d9e9ee; border-radius: 14px; background: #fffdf7; }
+.github-mini-flow li > span { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; color: white; background: var(--deep); border-radius: 50%; font-size: 12px; font-weight: 900; }
+.github-mini-flow strong { display: block; margin-bottom: 5px; font-size: 14px; }.github-mini-flow small { color: #728083; font-size: 11px; }
+.handoff-note { width: min(1060px, calc(100% - 72px)); margin: 90px auto; padding: 34px 44px 34px 30px; display: grid; grid-template-columns: 160px 1fr; align-items: center; gap: 38px; background: #fff1ce; border: 1px solid #edc98c; border-radius: 24px; box-shadow: 0 11px 0 rgba(117,72,46,.06); }
+.handoff-note img { width: 150px; height: 150px; object-fit: cover; border-radius: 19px; transform: rotate(-3deg); }
+.handoff-note h2 { margin: 11px 0 13px; font: 400 clamp(25px, 3vw, 36px)/1.2 Georgia, "Yu Mincho", serif; letter-spacing: -.035em; }
+.handoff-note p { margin: 0; color: #735e52; font-size: 14px; line-height: 1.85; }.handoff-note p strong { color: var(--deep); }.handoff-note p strong + strong::before { content: " / "; color: var(--accent-dark); }
+.guide-final-cta { padding: 47px max(36px, calc((100vw - 1060px) / 2)); display: flex; align-items: center; justify-content: space-between; gap: 30px; color: white; background: var(--deep-2); }
+.guide-final-cta > span { color: #ecd5c7; font-size: 14px; }.guide-final-cta .guide-start { min-width: 275px; }
+
 .app-shell { min-height: 100vh; display: flex; }
 .sidebar {
   position: fixed;
@@ -39,6 +111,7 @@ button { color: inherit; }
   border-right: 1px solid rgba(255,255,255,.08);
 }
 .brand { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; font-size: 21px; font-weight: 800; letter-spacing: -.03em; }
+.brand-button { padding: 0; border: 0; background: transparent; cursor: pointer; }
 .brand-mark { display: block; width: 36px; height: 36px; object-fit: cover; border: 2px solid rgba(255,255,255,.75); border-radius: 11px; box-shadow: 0 4px 10px rgba(43,25,20,.22); }
 .mascot-card { margin-top: 23px; padding: 8px; display: grid; grid-template-columns: 78px 1fr; align-items: center; gap: 10px; color: #55362d; background: #fff3d5; border: 2px solid #f1a248; border-radius: 18px; transform: rotate(-1deg); box-shadow: 0 9px 0 rgba(54,31,25,.16); }
 .mascot-card img { width: 78px; height: 78px; display: block; object-fit: cover; border-radius: 13px; }
@@ -66,6 +139,9 @@ button { color: inherit; }
 .progress span { display: block; height: 100%; background: var(--accent); transition: width .3s ease; }
 .save-status { color: #596661; font-size: 13px; opacity: 0; transform: translateY(3px); transition: .2s; }
 .save-status.visible { opacity: 1; transform: none; }
+.topbar-actions { display: flex; align-items: center; gap: 18px; }
+.guide-link { padding: 7px 11px; color: var(--deep); border: 1px solid #dbc7b2; border-radius: 8px; background: transparent; font-size: 12px; font-weight: 800; cursor: pointer; }
+.guide-link:hover { background: #fffdf7; }
 .content-wrap { width: min(1060px, calc(100% - 72px)); margin: 0 auto; }
 .stage { padding: 68px 0 56px; animation: stage-in .35s ease both; }
 @keyframes stage-in { from { opacity: 0; transform: translateY(6px); } }
@@ -268,6 +344,12 @@ button { color: inherit; }
 .next-button { justify-self: end; min-width: 155px; min-height: 43px; padding: 0 18px; }
 
 @media (max-width: 980px) {
+  .guide-hero { grid-template-columns: 1fr; gap: 36px; }
+  .guide-hero-copy { max-width: 740px; }
+  .guide-hero-visual { width: min(650px, 100%); margin: 0 auto; }
+  .workflow-map { grid-template-columns: repeat(3, 1fr); }
+  .workflow-map::before, .workflow-map li::after { display: none; }
+  .github-guide { grid-template-columns: 1fr; gap: 35px; }
   .sidebar { width: 218px; padding-left: 22px; padding-right: 22px; }
   .mascot-card { grid-template-columns: 58px 1fr; }
   .mascot-card img { width: 58px; height: 58px; }
@@ -282,6 +364,38 @@ button { color: inherit; }
 }
 
 @media (max-width: 720px) {
+  .guide-header { width: calc(100% - 30px); height: 72px; }
+  .guide-header-note { display: none; }
+  .guide-hero { width: calc(100% - 30px); min-height: 0; padding: 54px 0 62px; gap: 45px; }
+  .guide-hero-copy h1 { font-size: clamp(40px, 12vw, 57px); }
+  .guide-hero-copy > p { font-size: 14px; }
+  .guide-actions { align-items: stretch; flex-direction: column; gap: 20px; }
+  .guide-start { width: 100%; }
+  .guide-actions > a { text-align: center; }
+  .guide-hero-visual { min-height: 325px; grid-template-columns: 1fr 55px 1fr; }
+  .guide-hero-visual::before { width: 90%; height: 280px; }
+  .guide-tool-card { min-height: 196px; padding: 20px 15px; border-radius: 16px; }
+  .guide-tool-card strong { margin: 39px 0 10px; font-size: 25px; }
+  .guide-tool-card small { font-size: 11px; }
+  .guide-file { width: 52px; height: 65px; }
+  .guide-file::before { left: -17px; width: 15px; }.guide-file::after { right: -17px; width: 15px; }
+  .guide-result { right: 0; width: 100px; height: 76px; }
+  .workflow-section { padding: 67px 15px 72px; }
+  .workflow-heading { grid-template-columns: 1fr; gap: 22px; }
+  .workflow-heading h2 { font-size: 36px; }
+  .workflow-map { margin-top: 38px; grid-template-columns: 1fr; gap: 9px; }
+  .workflow-map li { min-height: 154px; padding: 18px 18px 18px 116px; }
+  .workflow-number { position: absolute; left: 18px; top: 13px; }
+  .workflow-icon { position: absolute; left: 17px; top: 34px; width: 75px; height: 75px; margin: 0; }
+  .workflow-map h3 { min-height: auto; margin-top: 9px; }
+  .github-guide { width: calc(100% - 30px); margin-top: 60px; padding: 27px 20px; gap: 29px; }
+  .github-guide-copy h2 { font-size: 38px; }
+  .handoff-note { width: calc(100% - 30px); margin: 60px auto; padding: 24px 20px; grid-template-columns: 1fr; gap: 22px; }
+  .handoff-note img { width: 105px; height: 105px; }
+  .handoff-note p strong { display: block; }
+  .handoff-note p strong + strong::before { display: none; }
+  .guide-final-cta { padding: 36px 15px; flex-direction: column; align-items: stretch; text-align: center; }
+  .guide-final-cta .guide-start { min-width: 0; }
   .app-shell { display: block; }
   .sidebar { position: sticky; top: 0; width: 100%; height: 68px; padding: 0 18px; flex-direction: row; align-items: center; }
   .sidebar > div:first-child { display: flex; align-items: center; }
@@ -294,6 +408,8 @@ button { color: inherit; }
   .step-link strong { display: none; }
   .workspace { width: 100%; margin-left: 0; padding-bottom: 72px; }
   .topbar { height: 58px; padding: 0 20px; }
+  .guide-link { padding: 6px 8px; }
+  .topbar-actions { gap: 8px; }
   .content-wrap { width: min(100% - 30px, 620px); }
   .stage { padding: 42px 0; }
   .stage-heading { margin-bottom: 31px; }

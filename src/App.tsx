@@ -735,6 +735,8 @@ LPmakerから書き出されたLP制作プロジェクトです。
 }
 
 export default function Home() {
+  const [showGuide, setShowGuide] = useState(true);
+  const [hasDraft, setHasDraft] = useState(false);
   const [step, setStep] = useState(0);
   const [data, setData] = useState<ProjectData>(initialData);
   const [saved, setSaved] = useState(false);
@@ -747,6 +749,7 @@ export default function Home() {
     if (stored) {
       try {
         setData({ ...initialData, ...JSON.parse(stored) });
+        setHasDraft(true);
       } catch {
         window.localStorage.removeItem("lpmaker-draft-v1");
       }
@@ -819,6 +822,7 @@ export default function Home() {
     setData(initialData);
     setStep(0);
     setDownloaded(false);
+    setHasDraft(false);
     window.localStorage.removeItem("lpmaker-draft-v1");
   }
 
@@ -834,14 +838,103 @@ export default function Home() {
     window.setTimeout(() => setStartCopied(false), 1800);
   }
 
+  if (showGuide) {
+    return (
+      <main className="guide-page" id="top">
+        <header className="guide-header">
+          <a className="brand guide-brand" href="#top" aria-label="LPmaker ホーム">
+            <img className="brand-mark" src={`${import.meta.env.BASE_URL}lpmaker-icon.png`} alt="" aria-hidden="true" />
+            <span>LPmaker</span>
+          </a>
+          <span className="guide-header-note">LP制作の設計図をつくるツール</span>
+        </header>
+
+        <section className="guide-hero">
+          <div className="guide-hero-copy">
+            <span className="kicker">はじめる前に、全体像をつかむ</span>
+            <h1>入力からLP完成まで、<br />迷わず進めます。</h1>
+            <p>LPmakerでつくるのは、Codexが迷わず制作できる「設計図」です。質問に答えてZIPを書き出し、Codexへ渡すと、LPの実装と共有まで進められます。</p>
+            <div className="guide-actions">
+              <button className="guide-start" type="button" onClick={() => setShowGuide(false)}>
+                {hasDraft ? "保存中の設計図をひらく" : "設計図づくりをはじめる"}<span>→</span>
+              </button>
+              <a href="#workflow">流れをくわしく見る</a>
+            </div>
+          </div>
+          <div className="guide-hero-visual" aria-label="LPmakerからCodexへ設計図を渡し、LPが完成する流れ">
+            <div className="guide-tool-card guide-tool-maker">
+              <span>STEP 1—3</span>
+              <strong>LPmaker</strong>
+              <small>質問に答えて<br />設計図をつくる</small>
+            </div>
+            <div className="guide-file" aria-hidden="true"><i /><i /><b>ZIP</b></div>
+            <div className="guide-tool-card guide-tool-codex">
+              <span>STEP 4—5</span>
+              <strong>Codex</strong>
+              <small>設計図を読み<br />LPを実装する</small>
+            </div>
+            <div className="guide-result" aria-hidden="true"><span /><span /><span /><b>LP</b></div>
+          </div>
+        </section>
+
+        <section className="workflow-section" id="workflow" aria-labelledby="workflow-title">
+          <div className="workflow-heading">
+            <div><span className="kicker">WORKFLOW</span><h2 id="workflow-title">完成までの、5つのステップ。</h2></div>
+            <p>LPmakerで設計図を整えたあと、Codexへ渡して制作します。ここまで分かれば、あとは画面の案内どおりに進むだけです。</p>
+          </div>
+          <ol className="workflow-map">
+            <li><span className="workflow-number">01</span><div className="workflow-icon repo-icon" aria-hidden="true"><i /><i /><i /></div><small>準備</small><h3>空のリポジトリを用意</h3><p>LPの保存先になるGitHubリポジトリを1つ作り、URLをコピーします。</p></li>
+            <li><span className="workflow-number">02</span><div className="workflow-icon choice-icon" aria-hidden="true"><i>✓</i><i>✓</i><i /></div><small>LPmaker</small><h3>質問に答える</h3><p>掲載情報、LPの型、雰囲気を選びます。文章での補足は必要なところだけ。</p></li>
+            <li><span className="workflow-number">03</span><div className="workflow-icon zip-icon" aria-hidden="true">ZIP<span>↓</span></div><small>LPmaker</small><h3>設計図を書き出す</h3><p>入力内容と制作ルールをまとめたZIPを、端末へダウンロードします。</p></li>
+            <li><span className="workflow-number">04</span><div className="workflow-icon codex-icon" aria-hidden="true">C<span>＋</span></div><small>Codex</small><h3>フォルダを渡して依頼</h3><p>ZIPを展開してCodexで開き、画面に表示される依頼文を送ります。</p></li>
+            <li><span className="workflow-number">05</span><div className="workflow-icon publish-icon" aria-hidden="true"><i /><i /><b>✓</b></div><small>完成</small><h3>LPを確認・共有する</h3><p>Codexが個別リポジトリへ実装。表示を確認したら共有できます。</p></li>
+          </ol>
+        </section>
+
+        <section className="github-guide" aria-labelledby="github-guide-title">
+          <div className="github-guide-copy">
+            <span className="kicker">BEFORE YOU START</span>
+            <h2 id="github-guide-title">GitHubって、なに？</h2>
+            <p><strong>LPのファイルをインターネット上に保管する場所</strong>です。今回は、CodexがつくったLPを保存する「専用の保管箱」として使います。プログラミングの知識は必要ありません。</p>
+            <div className="github-links">
+              <a href="https://github.com/signup" target="_blank" rel="noreferrer">初めての方：無料アカウントを作る <span>↗</span></a>
+              <a href="https://github.com/new" target="_blank" rel="noreferrer">アカウントがある方：空の保管箱を作る <span>↗</span></a>
+            </div>
+          </div>
+          <ol className="github-mini-flow" aria-label="GitHubで準備する3ステップ">
+            <li><span>1</span><div><strong>アカウントを作る</strong><small>メールアドレスで無料登録</small></div></li>
+            <li><span>2</span><div><strong>New repositoryを選ぶ</strong><small>LP専用の空の保管箱を作成</small></div></li>
+            <li><span>3</span><div><strong>URLをコピーする</strong><small>LPmakerの入力欄へ貼り付け</small></div></li>
+          </ol>
+        </section>
+
+        <section className="handoff-note">
+          <img src={`${import.meta.env.BASE_URL}mascot-mochisura-bear-hood-01.png`} alt="オレンジ色のくまフードをかぶった、水色のもちすらマスコット" />
+          <div>
+            <span className="review-label">THE KEY POINT</span>
+            <h2>LPmakerとCodex、2つを順番に使います。</h2>
+            <p><strong>LPmakerは「何をつくるか」を整理。</strong><strong>Codexは「実際のLP」を制作。</strong>途中で迷わないよう、ZIPを書き出した後の手順と依頼文も画面内に用意しています。</p>
+          </div>
+        </section>
+
+        <section className="guide-final-cta">
+          <span>準備するものは、LPの情報と空のリポジトリURLだけ。</span>
+          <button className="guide-start" type="button" onClick={() => { setShowGuide(false); window.scrollTo({ top: 0 }); }}>
+            {hasDraft ? "保存中の設計図をひらく" : "設計図づくりをはじめる"}<span>→</span>
+          </button>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="app-shell">
       <aside className="sidebar">
         <div>
-          <a className="brand" href="#top" aria-label="LPmaker ホーム">
+          <button className="brand brand-button" type="button" onClick={() => setShowGuide(true)} aria-label="LPmakerの使い方へ戻る">
             <img className="brand-mark" src={`${import.meta.env.BASE_URL}lpmaker-icon.png`} alt="" aria-hidden="true" />
             <span>LPmaker</span>
-          </a>
+          </button>
           <div className="mascot-card">
             <img src={`${import.meta.env.BASE_URL}mascot-mochisura-bear-hood-01.png`} alt="オレンジ色のくまフードをかぶった、水色のもちすらマスコット" />
             <span>選ぶだけで<br />LPの設計図が完成！</span>
@@ -878,7 +971,10 @@ export default function Home() {
               <span style={{ width: `${((step + 1) / 4) * 100}%` }} />
             </div>
           </div>
-          <span className={`save-status ${saved ? "visible" : ""}`}>保存しました</span>
+          <div className="topbar-actions">
+            <button type="button" className="guide-link" onClick={() => setShowGuide(true)}>全体の流れ</button>
+            <span className={`save-status ${saved ? "visible" : ""}`}>保存しました</span>
+          </div>
         </header>
 
         <div className="content-wrap">
