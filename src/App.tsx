@@ -861,20 +861,12 @@ export default function Home() {
               <a href="#workflow">流れをくわしく見る</a>
             </div>
           </div>
-          <div className="guide-hero-visual" aria-label="LPmakerからCodexへ設計図を渡し、LPが完成する流れ">
-            <div className="guide-tool-card guide-tool-maker">
-              <span>STEP 1—3</span>
-              <strong>LPmaker</strong>
-              <small>質問に答えて<br />設計図をつくる</small>
-            </div>
-            <div className="guide-file" aria-hidden="true"><i /><i /><b>ZIP</b></div>
-            <div className="guide-tool-card guide-tool-codex">
-              <span>STEP 4—5</span>
-              <strong>Codex</strong>
-              <small>設計図を読み<br />LPを実装する</small>
-            </div>
-            <div className="guide-result" aria-hidden="true"><span /><span /><span /><b>LP</b></div>
-          </div>
+          <figure className="guide-hero-visual">
+            <img
+              src="/LP_codex_000/og-mochisura.png"
+              alt="LPmakerでリポジトリを準備し、質問への回答をZIPにまとめ、Codexへ渡してLPを完成させる5つの流れ"
+            />
+          </figure>
         </section>
 
         <section className="workflow-section" id="workflow" aria-labelledby="workflow-title">

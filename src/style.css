@@ -36,27 +36,8 @@ button { color: inherit; }
 .guide-actions > a { color: var(--deep); font-size: 13px; font-weight: 800; text-underline-offset: 5px; }
 .guide-start { min-height: 58px; padding: 0 24px; display: inline-flex; align-items: center; justify-content: center; gap: 30px; color: #3f2b25; border: 0; border-radius: 12px; background: var(--accent); box-shadow: 0 8px 0 rgba(146,79,22,.16); font-size: 15px; font-weight: 900; cursor: pointer; transition: .2s ease; }
 .guide-start:hover { background: #f6a746; transform: translateY(-2px); box-shadow: 0 10px 0 rgba(146,79,22,.14); }
-.guide-hero-visual { position: relative; min-height: 410px; display: grid; grid-template-columns: 1fr 84px 1fr; align-items: center; isolation: isolate; }
-.guide-hero-visual::before { content: ""; position: absolute; z-index: -1; width: 460px; height: 360px; right: 15px; top: 25px; background: #ffedc6; border-radius: 51% 49% 45% 55% / 54% 43% 57% 46%; transform: rotate(-5deg); }
-.guide-tool-card { min-height: 245px; padding: 28px 25px; display: flex; flex-direction: column; border-radius: 22px; box-shadow: 0 14px 0 rgba(58,34,27,.1); }
-.guide-tool-card > span { font: 800 10px/1 ui-monospace, monospace; letter-spacing: .1em; }
-.guide-tool-card strong { margin: 52px 0 13px; font: 400 34px/1 Georgia, "Yu Mincho", serif; }
-.guide-tool-card small { font-size: 13px; font-weight: 700; line-height: 1.65; }
-.guide-tool-maker { align-self: start; color: var(--deep); background: #fffdf7; border: 1px solid #e8d8c3; transform: rotate(-2deg); }
-.guide-tool-maker > span { color: var(--accent-dark); }
-.guide-tool-codex { align-self: end; color: white; background: var(--deep); transform: rotate(2deg); }
-.guide-tool-codex > span { color: var(--sky); }
-.guide-tool-codex small { color: #edd6c7; }
-.guide-file { position: relative; z-index: 2; width: 72px; height: 82px; display: grid; place-items: center; color: var(--deep); background: var(--sky); border: 2px solid var(--deep); border-radius: 10px; box-shadow: 6px 7px 0 rgba(58,34,27,.16); transform: rotate(6deg); }
-.guide-file::before, .guide-file::after { content: ""; position: absolute; top: 37px; width: 28px; height: 2px; background: var(--deep); }
-.guide-file::before { left: -31px; }.guide-file::after { right: -31px; }
-.guide-file i { position: absolute; left: 17px; right: 17px; height: 2px; background: rgba(67,43,37,.25); }
-.guide-file i:first-child { top: 21px; }.guide-file i:nth-child(2) { top: 29px; }
-.guide-file b { padding-top: 20px; font: 900 13px/1 ui-monospace, monospace; }
-.guide-result { position: absolute; right: -11px; bottom: 0; width: 128px; height: 96px; padding: 17px; color: var(--deep); background: white; border: 2px solid var(--deep); border-radius: 11px; box-shadow: 8px 9px 0 var(--blush); transform: rotate(-3deg); }
-.guide-result span { width: 70%; height: 5px; margin-bottom: 7px; display: block; background: #efd9c1; border-radius: 10px; }
-.guide-result span:nth-child(2) { width: 94%; }.guide-result span:nth-child(3) { width: 55%; }
-.guide-result b { position: absolute; right: 14px; bottom: 12px; font: 900 15px/1 ui-monospace, monospace; }
+.guide-hero-visual { margin: 0; overflow: hidden; border: 1px solid #e8d8c3; border-radius: 22px; background: #fff8ea; box-shadow: 0 18px 42px rgba(58,34,27,.14); transform: rotate(1deg); }
+.guide-hero-visual img { width: 100%; height: auto; display: block; }
 
 .workflow-section { padding: 92px max(36px, calc((100vw - 1240px) / 2)) 100px; color: #fff8ed; background: var(--deep); }
 .workflow-heading { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 50px; }
@@ -372,14 +353,7 @@ button { color: inherit; }
   .guide-actions { align-items: stretch; flex-direction: column; gap: 20px; }
   .guide-start { width: 100%; }
   .guide-actions > a { text-align: center; }
-  .guide-hero-visual { min-height: 325px; grid-template-columns: 1fr 55px 1fr; }
-  .guide-hero-visual::before { width: 90%; height: 280px; }
-  .guide-tool-card { min-height: 196px; padding: 20px 15px; border-radius: 16px; }
-  .guide-tool-card strong { margin: 39px 0 10px; font-size: 25px; }
-  .guide-tool-card small { font-size: 11px; }
-  .guide-file { width: 52px; height: 65px; }
-  .guide-file::before { left: -17px; width: 15px; }.guide-file::after { right: -17px; width: 15px; }
-  .guide-result { right: 0; width: 100px; height: 76px; }
+  .guide-hero-visual { border-radius: 14px; transform: none; }
   .workflow-section { padding: 67px 15px 72px; }
   .workflow-heading { grid-template-columns: 1fr; gap: 22px; }
   .workflow-heading h2 { font-size: 36px; }
