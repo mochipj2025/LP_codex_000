@@ -846,7 +846,10 @@ export default function Home() {
             <img className="brand-mark" src={`${import.meta.env.BASE_URL}lpmaker-icon.png`} alt="" aria-hidden="true" />
             <span>LPmaker</span>
           </a>
-          <span className="guide-header-note">LP制作の設計図をつくるツール</span>
+          <div className="guide-header-actions">
+            <span className="guide-header-note">LP制作の設計図をつくるツール</span>
+            <a className="examples-link" href={`${import.meta.env.BASE_URL}examples/`}>完成作例を見る</a>
+          </div>
         </header>
 
         <section className="guide-hero">
@@ -859,6 +862,7 @@ export default function Home() {
                 {hasDraft ? "保存中の設計図をひらく" : "設計図づくりをはじめる"}<span>→</span>
               </button>
               <a href="#workflow">流れをくわしく見る</a>
+              <a href={`${import.meta.env.BASE_URL}examples/`}>4つの完成作例を見る</a>
             </div>
           </div>
           <figure className="guide-hero-visual">
@@ -964,6 +968,7 @@ export default function Home() {
             </div>
           </div>
           <div className="topbar-actions">
+            <a className="guide-link examples-link" href={`${import.meta.env.BASE_URL}examples/`}>完成作例</a>
             <button type="button" className="guide-link" onClick={() => setShowGuide(true)}>全体の流れ</button>
             <span className={`save-status ${saved ? "visible" : ""}`}>保存しました</span>
           </div>
