@@ -843,7 +843,7 @@ export default function Home() {
             <span>LPmaker</span>
           </a>
           <div className="mascot-card">
-            <img src={`${import.meta.env.BASE_URL}mascot-mochisura-bear.png`} alt="くまのフードをかぶった、もちすらのマスコット" />
+            <img src={`${import.meta.env.BASE_URL}mascot-mochisura-bear-hood-01.png`} alt="オレンジ色のくまフードをかぶった、水色のもちすらマスコット" />
             <span>選ぶだけで<br />LPの設計図が完成！</span>
           </div>
           <p className="sidebar-copy">むずかしい文章は不要。詳しく伝えたいところだけ、あとから補足できます。</p>
