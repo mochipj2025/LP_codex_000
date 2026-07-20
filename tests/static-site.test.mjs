@@ -6,6 +6,7 @@ test("builds a GitHub Pages-ready static site", () => {
   assert.equal(existsSync("docs/index.html"), true);
   assert.equal(existsSync("docs/mascot-mochisura-bear.png"), true);
   assert.equal(existsSync("docs/mascot-mochisura-bear-hood-01.png"), true);
+  assert.equal(existsSync("docs/og-mochisura.png"), true);
   assert.equal(existsSync("docs/lpmaker-icon.png"), true);
   assert.equal(existsSync("docs/site.webmanifest"), true);
   assert.equal(existsSync("docs/.nojekyll"), true);
@@ -13,6 +14,7 @@ test("builds a GitHub Pages-ready static site", () => {
   const html = readFileSync("docs/index.html", "utf8");
   assert.match(html, /<title>LPmaker/);
   assert.match(html, /lpmaker-icon\.png/);
+  assert.match(html, /og-mochisura\.png/);
   assert.match(html, /\/LP_codex_000\/assets\//);
 
   const appSource = readFileSync("src/App.tsx", "utf8");
