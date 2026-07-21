@@ -910,7 +910,7 @@ export default function Home() {
         <section className="github-guide" aria-labelledby="github-guide-title">
           <div className="github-guide-copy">
             <span className="kicker">PUBLISH LATER</span>
-            <h2 id="github-guide-title">公開は、完成を見てから。</h2>
+            <h2 id="github-guide-title">公開は、<br />完成を見てから。</h2>
             <p><strong>GitHubの準備は任意です。</strong>まずローカルでLPを完成・確認し、共有したくなった時点でリポジトリを用意できます。最初から公開したい方だけURLを登録してください。</p>
             <div className="github-links">
               <a href="https://github.com/signup" target="_blank" rel="noreferrer">初めての方：無料アカウントを作る <span>↗</span></a>
