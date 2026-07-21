@@ -10,6 +10,12 @@ test("builds a GitHub Pages-ready static site", () => {
   assert.equal(existsSync("docs/lpmaker-icon.png"), true);
   assert.equal(existsSync("docs/site.webmanifest"), true);
   assert.equal(existsSync("docs/.nojekyll"), true);
+  assert.equal(existsSync("docs/examples/index.html"), true);
+  assert.equal(existsSync("docs/examples/common.css"), true);
+  assert.equal(existsSync("docs/examples/bakery/index.html"), true);
+  assert.equal(existsSync("docs/examples/b2b/index.html"), true);
+  assert.equal(existsSync("docs/examples/workshop/index.html"), true);
+  assert.equal(existsSync("docs/examples/aroma/index.html"), true);
 
   const html = readFileSync("docs/index.html", "utf8");
   assert.match(html, /<title>LPmaker/);
@@ -38,4 +44,5 @@ test("builds a GitHub Pages-ready static site", () => {
   assert.match(appSource, /店舗・SNS・外部リンク/);
   assert.match(appSource, /externalLinks/);
   assert.match(appSource, /地図・アクセス/);
+  assert.match(appSource, /4つの完成作例を見る/);
 });

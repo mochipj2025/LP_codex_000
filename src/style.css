@@ -27,6 +27,10 @@ button { color: inherit; }
 /* LPmaker overview */
 .guide-page { min-height: 100vh; overflow: hidden; background: var(--paper); }
 .guide-header { width: min(1240px, calc(100% - 72px)); height: 92px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+.guide-header-actions { display: flex; align-items: center; gap: 18px; }
+.examples-link { color: inherit; text-decoration: none; }
+.guide-header .examples-link { padding: 9px 14px; color: var(--deep); border: 1px solid #dbc7b2; border-radius: 9px; font-size: 12px; font-weight: 800; }
+.guide-header .examples-link:hover { background: #fffdf7; }
 .guide-brand { color: var(--deep); }
 .guide-header-note { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .06em; }
 .guide-hero { width: min(1240px, calc(100% - 72px)); min-height: 590px; margin: 0 auto; padding: 82px 0 76px; display: grid; grid-template-columns: .92fr 1.08fr; align-items: center; gap: 74px; }
