@@ -6,6 +6,7 @@ test("builds a GitHub Pages-ready static site", () => {
   assert.equal(existsSync("docs/index.html"), true);
   assert.equal(existsSync("docs/mascot-mochisura-bear.png"), true);
   assert.equal(existsSync("docs/mascot-mochisura-bear-hood-01.png"), true);
+  assert.equal(existsSync("docs/mascot-mochisura-diagram.png"), true);
   assert.equal(existsSync("docs/og-mochisura.png"), true);
   assert.equal(existsSync("docs/lpmaker-icon.png"), true);
   assert.equal(existsSync("docs/site.webmanifest"), true);
@@ -26,12 +27,17 @@ test("builds a GitHub Pages-ready static site", () => {
   const appSource = readFileSync("src/App.tsx", "utf8");
   assert.match(appSource, /mascot-mochisura-bear-hood-01\.png/);
   assert.match(appSource, /完成までの、5つのステップ/);
-  assert.match(appSource, /GitHubって、なに/);
+  assert.match(appSource, /公開は、完成を見てから/);
   assert.match(appSource, /設計図づくりをはじめる/);
   assert.match(appSource, /全体の流れ/);
   assert.match(appSource, /forbiddenPlatforms/);
   assert.match(appSource, /ChatGPT Sites、OpenAI Sites/);
   assert.match(appSource, /http:\/\/localhost:8000\/index\.html/);
+  assert.match(appSource, /まずローカルで作る/);
+  assert.match(appSource, /リポジトリURLなしでもZIPを書き出せます/);
+  assert.match(appSource, /PC幅とスマホ幅でプレビュー/);
+  assert.match(appSource, /repositoryOptional: true/);
+  assert.doesNotMatch(appSource, /\["個別リポジトリURL", data\.repositoryUrl\]/);
   assert.match(appSource, /利用前の悩み/);
   assert.match(appSource, /掲載できる安心材料/);
   assert.match(appSource, /infer-with-codex/);

@@ -11,6 +11,7 @@ type ExternalLink = {
 };
 
 type ProjectData = {
+  publishMode: "local" | "github";
   repositoryUrl: string;
   personaMode: "ai" | "manual";
   projectName: string;
@@ -40,6 +41,7 @@ type ProjectData = {
 };
 
 const initialData: ProjectData = {
+  publishMode: "local",
   repositoryUrl: "",
   personaMode: "ai",
   projectName: "",
@@ -426,11 +428,14 @@ function buildCodexSkillset() {
 - 情報が未指定の箇所は合理的な仮説で補えますが、実績、価格、資格、顧客の発言、数値を捏造しません。
 
 ## 作業ルール
-- project.json の repositoryUrl にある個別リポジトリを制作先にします。
+- repositoryUrl が未設定でも、共有された制作フォルダを作業場所として直ちに制作を開始します。
+- repositoryUrl が設定されている場合だけ、その個別リポジトリを制作先として使います。
 - ChatGPT Sites、OpenAI Sites、*.chatgpt.site は使わず、.openai/hosting.json も作りません。
-- リポジトリ直下の index.html を公開・プレビュー入口にし、CSS、JavaScript、画像は相対パスで参照します。
+- 作業フォルダ直下の index.html を公開・プレビュー入口にし、CSS、JavaScript、画像は相対パスで参照します。
 - 必要な画像は assets/IMAGE_BRIEF.md に従って生成または配置します。
-- 実装後はリンク、CTA、モバイル表示を確認し、ローカルの index.html をプレビューしてからcommit・pushします。
+- 実装後はローカルサーバーをバックグラウンドで起動し、http://localhost:8000/index.html を開ける状態にします。
+- PC幅とスマホ幅で、画像、文字切れ、CTA、内部リンク、外部リンクを確認し、不具合を直してから完成報告します。
+- repositoryUrl がある場合だけcommit・pushします。未設定の場合はローカル完成までで止め、公開を強制しません。
 
 ## 開始方法
 - このスキルセットを受け取った時点では、まず「LP制作ルールをセットしました。制作フォルダと開始文を送ってください。」と短く返してください。
@@ -441,11 +446,13 @@ function buildCodexSkillset() {
 function buildCodexStartInstruction() {
   return `LP制作を開始してください。
 
-共有したLPmakerフォルダの START_HERE.md、AGENTS.md、project.json、BRIEF.md を先に読み、project.json の repositoryUrl にある個別リポジトリへLPを実装してください。
+共有したLPmakerフォルダの START_HERE.md、AGENTS.md、project.json、BRIEF.md を先に読み、LPを実装してください。repositoryUrl が未設定でも止まらず、この共有フォルダを制作先として作業を開始してください。
 
-準備の説明だけで終了せず、リポジトリの確認またはcloneから実装へ進んでください。未指定項目は制作上の仮説で補って構いませんが、実績・価格・資格・顧客の声・数値は捏造しないでください。ChatGPT Sites・OpenAI Sites・*.chatgpt.site は使わず、.openai/hosting.json も作成しないでください。
+準備の説明だけで終了せず、repositoryUrl があればリポジトリを確認またはcloneし、なければ共有フォルダ内で実装へ進んでください。未指定項目は制作上の仮説で補って構いませんが、実績・価格・資格・顧客の声・数値は捏造しないでください。ChatGPT Sites・OpenAI Sites・*.chatgpt.site は使わず、.openai/hosting.json も作成しないでください。
 
-入口はリポジトリ直下の index.html にし、相対パスで動く静的サイトとして制作してください。必要な画像を生成・配置し、リポジトリ直下で python -m http.server 8000 を実行して http://localhost:8000/index.html を確認してください。表示とCTAを確認したらcommit・pushまで完了し、最後にプレビュー方法と変更内容を報告してください。`;
+入口は作業フォルダ直下の index.html にし、相対パスで動く静的サイトとして制作してください。必要な画像を生成・配置したら、作業フォルダ直下で python -m http.server 8000 をバックグラウンド実行し、http://localhost:8000/index.html を開ける状態にしてください。
+
+完成報告の前にPC幅とスマホ幅でプレビューし、画像切れ、文字切れ、レイアウト、CTA、内部リンク、外部リンクを確認してください。問題があれば修正して再確認してください。最後にプレビューURL、確認結果、変更内容を報告してください。repositoryUrl が設定されている場合だけcommit・pushまで行ってください。`;
 }
 
 function buildFiles(data: ProjectData) {
@@ -479,14 +486,16 @@ function buildFiles(data: ProjectData) {
     : "- 未指定";
   const slug = slugify(data.projectName);
   const generatedAt = new Date().toISOString();
+  const hasRepository = data.publishMode === "github" && Boolean(data.repositoryUrl.trim());
+  const destinationLabel = hasRepository ? data.repositoryUrl.trim() : "共有フォルダ内でローカル制作";
   const project = {
-    schemaVersion: "1.0",
+    schemaVersion: "1.1",
     generatedBy: "LPmaker",
     generatedAt,
     project: {
       name: normalize(data.projectName),
       slug,
-      repositoryUrl: normalize(data.repositoryUrl),
+      repositoryUrl: hasRepository ? data.repositoryUrl.trim() : null,
       entryPoint: "index.html",
       brand: normalize(data.brandName),
       offering: normalize(offering),
@@ -514,9 +523,14 @@ function buildFiles(data: ProjectData) {
       mood: { id: mood.id, name: mood.title, description: mood.direction, colors: mood.colors },
     },
     delivery: {
-      mode: "repository-static-site",
+      mode: hasRepository ? "repository-static-site" : "local-static-site",
+      repositoryOptional: true,
       previewEntry: "index.html",
       previewCommand: "python -m http.server 8000",
+      previewUrl: "http://localhost:8000/index.html",
+      previewRequired: true,
+      qualityChecks: ["desktop", "mobile", "images", "text-overflow", "cta", "internal-links", "external-links"],
+      publishRequested: hasRepository,
       forbiddenPlatforms: ["ChatGPT Sites", "*.chatgpt.site"],
       forbiddenFiles: [".openai/hosting.json"],
     },
@@ -525,7 +539,8 @@ function buildFiles(data: ProjectData) {
   const brief = `# ${normalize(data.projectName)} — LP制作ブリーフ
 
 ## このLPの目的
-- 制作先リポジトリ: ${normalize(data.repositoryUrl)}
+- 制作先: ${destinationLabel}
+- GitHub公開: ${hasRepository ? "希望する" : "希望しない（まずローカルで確認）"}
 - 公開エントリーポイント: index.html
 - 提供内容: ${normalize(offering)}
 - 想定ユーザー: ${normalize(audience)}
@@ -572,22 +587,24 @@ ${normalize(notes)}
   const agents = `# AGENTS.md
 
 ## Mission
-このフォルダの情報を一次情報として、project.json に記載された個別リポジトリへ公開可能なランディングページを実装する。
+このフォルダの情報を一次情報として、ローカルで確認できるランディングページを実装する。リポジトリの有無を作業開始の条件にしない。
 
-## Repository workflow
-- project.json の repositoryUrl を制作先として使う。
-- リポジトリが手元にない場合はcloneし、既に開かれている場合は現在のリポジトリを確認して使う。
-- リポジトリ直下の index.html を公開入口にする。
+## Workspace workflow
+- project.json の repositoryUrl が null または未設定なら、この共有フォルダを制作先として使う。
+- repositoryUrl が設定されている場合だけ、対象リポジトリをcloneまたは確認して制作先にする。
+- 作業フォルダ直下の index.html を公開・プレビュー入口にする。
 - CSS・JavaScript・画像は相対パスで参照し、静的ホスティングで表示できる構成にする。
-- 完成後は変更をcommitし、指定リポジトリへpushする。
+- repositoryUrl が設定されている場合だけ、完成後に変更をcommit・pushする。
 
 ## Non-negotiable delivery rules
 - ChatGPT Sites、OpenAI Sites、または *.chatgpt.site へ公開しない。
 - .openai/hosting.json を作成せず、Sites用の初期化・ビルド・デプロイを実行しない。
-- プレビュー入口は必ずリポジトリ直下の index.html とする。
+- プレビュー入口は必ず作業フォルダ直下の index.html とする。
 - index.html からCSS・JavaScript・画像を相対パスで読み込み、特定サービスのURLへ依存させない。
-- プレビュー時はリポジトリ直下で \`python -m http.server 8000\` を実行し、\`http://localhost:8000/index.html\` を開く。
+- 実装後は作業フォルダ直下で \`python -m http.server 8000\` をバックグラウンド実行し、\`http://localhost:8000/index.html\` を開ける状態にする。
 - フレームワークを使う場合も、最終成果物としてルートの index.html から確認できる静的ファイルを用意する。
+- 完成報告の前にPC幅とスマホ幅でプレビューし、画像切れ、文字切れ、レイアウト、CTA、内部リンク、外部リンクを確認する。
+- 不具合があれば修正して再確認し、確認結果とプレビューURLを最後に報告する。
 
 ## Source of truth
 1. project.json — 機械可読な確定情報
@@ -681,7 +698,10 @@ LPmakerの完了画面にある「① 制作ルールをコピー」を押し、
 展開したフォルダを同じCodexタスクへ共有します。続けてLPmakerの「② 開始文をコピー」を押し、貼り付けて送信します。
 
 ## 4. index.htmlで確認する
-Codexが個別リポジトリへ実装し、http://localhost:8000/index.html で表示を確認します。
+Codexが共有フォルダへ実装し、ローカルサーバーを起動します。http://localhost:8000/index.html を開き、PCとスマホの表示、画像、CTA、リンクの確認結果を受け取ります。
+
+## 5. 必要な場合だけ公開する
+repositoryUrl を登録した場合だけ、Codexが指定リポジトリへcommit・pushします。未登録の場合はローカル完成までで問題ありません。
 
 ## 制作ルール
 ${skillset}
@@ -695,9 +715,11 @@ ${startInstruction}
 LPmakerから書き出されたLP制作プロジェクトです。
 
 ## 制作先
-- リポジトリ: ${normalize(data.repositoryUrl)}
+- 作業場所: ${destinationLabel}
+- GitHub公開: ${hasRepository ? "指定リポジトリへcommit・pushする" : "行わない（ローカル確認後に追加可能）"}
 - 公開入口: index.html
-- プレビュー: リポジトリ直下で \`python -m http.server 8000\` → \`http://localhost:8000/index.html\`
+- プレビュー: 作業フォルダ直下で \`python -m http.server 8000\` → \`http://localhost:8000/index.html\`
+- 確認必須: PC / スマホ / 画像 / 文字切れ / CTA / 内部・外部リンク
 - 使用禁止: ChatGPT Sites / OpenAI Sites / *.chatgpt.site
 
 ## Codexでの開始方法
@@ -767,7 +789,6 @@ export default function Home() {
 
   const required = useMemo(
     () => [
-      ["個別リポジトリURL", data.repositoryUrl],
       ["プロジェクト名", data.projectName],
       ["商品・サービス", answerText(data.offeringType, offeringOptions, data.offering)],
       ["想定ユーザー", answerText(data.audienceTypes, audienceOptions, data.audience)],
@@ -856,7 +877,7 @@ export default function Home() {
           <div className="guide-hero-copy">
             <span className="kicker">はじめる前に、全体像をつかむ</span>
             <h1>入力からLP完成まで、<br />迷わず進めます。</h1>
-            <p>LPmakerでつくるのは、Codexが迷わず制作できる「設計図」です。質問に答えてZIPを書き出し、Codexへ渡すと、LPの実装と共有まで進められます。</p>
+            <p>LPmakerでつくるのは、Codexが迷わず制作できる「設計図」です。GitHubの準備は不要。質問に答えてZIPを渡すと、LP制作とローカルプレビューまで進められます。</p>
             <div className="guide-actions">
               <button className="guide-start" type="button" onClick={() => setShowGuide(false)}>
                 {hasDraft ? "保存中の設計図をひらく" : "設計図づくりをはじめる"}<span>→</span>
@@ -865,11 +886,10 @@ export default function Home() {
               <a href={`${import.meta.env.BASE_URL}examples/`}>4つの完成作例を見る</a>
             </div>
           </div>
-          <figure className="guide-hero-visual">
-            <img
-              src="/LP_codex_000/og-mochisura.png"
-              alt="LPmakerでリポジトリを準備し、質問への回答をZIPにまとめ、Codexへ渡してLPを完成させる5つの流れ"
-            />
+          <figure className="guide-hero-visual" aria-label="リポジトリなしでも、入力、ZIP、Codex制作、ローカルプレビューへ進める流れ">
+            <img className="guide-diagram-mascot" src={`${import.meta.env.BASE_URL}mascot-mochisura-diagram.png`} alt="くまフードをかぶった水色のもちスラ" />
+            <figcaption><strong>GitHubなしで、まず完成を見る。</strong><span>公開は確認したあとで大丈夫です。</span></figcaption>
+            <ol><li><b>1</b><span>質問に答える<small>近いものを選ぶだけ</small></span></li><li><b>2</b><span>ZIPを渡す<small>Codexが制作を開始</small></span></li><li><b>3</b><span>すぐ確認する<small>PC・スマホをプレビュー</small></span></li></ol>
           </figure>
         </section>
 
@@ -879,28 +899,28 @@ export default function Home() {
             <p>LPmakerで設計図を整えたあと、Codexへ渡して制作します。ここまで分かれば、あとは画面の案内どおりに進むだけです。</p>
           </div>
           <ol className="workflow-map">
-            <li><span className="workflow-number">01</span><div className="workflow-icon repo-icon" aria-hidden="true"><i /><i /><i /></div><small>準備</small><h3>空のリポジトリを用意</h3><p>LPの保存先になるGitHubリポジトリを1つ作り、URLをコピーします。</p></li>
-            <li><span className="workflow-number">02</span><div className="workflow-icon choice-icon" aria-hidden="true"><i>✓</i><i>✓</i><i /></div><small>LPmaker</small><h3>質問に答える</h3><p>掲載情報、LPの型、雰囲気を選びます。文章での補足は必要なところだけ。</p></li>
+            <li><span className="workflow-number">01</span><div className="workflow-icon choice-icon" aria-hidden="true"><i>✓</i><i>✓</i><i /></div><small>LPmaker</small><h3>質問に答える</h3><p>掲載情報、LPの型、雰囲気を選びます。GitHubの準備は不要です。</p></li>
+            <li><span className="workflow-number">02</span><div className="workflow-icon repo-icon" aria-hidden="true"><i /><i /><i /></div><small>任意</small><h3>公開方法を選ぶ</h3><p>まずローカルで作るか、リポジトリへ公開するかを選びます。</p></li>
             <li><span className="workflow-number">03</span><div className="workflow-icon zip-icon" aria-hidden="true">ZIP<span>↓</span></div><small>LPmaker</small><h3>設計図を書き出す</h3><p>入力内容と制作ルールをまとめたZIPを、端末へダウンロードします。</p></li>
             <li><span className="workflow-number">04</span><div className="workflow-icon codex-icon" aria-hidden="true">C<span>＋</span></div><small>Codex</small><h3>フォルダを渡して依頼</h3><p>ZIPを展開してCodexで開き、画面に表示される依頼文を送ります。</p></li>
-            <li><span className="workflow-number">05</span><div className="workflow-icon publish-icon" aria-hidden="true"><i /><i /><b>✓</b></div><small>完成</small><h3>LPを確認・共有する</h3><p>Codexが個別リポジトリへ実装。表示を確認したら共有できます。</p></li>
+            <li><span className="workflow-number">05</span><div className="workflow-icon publish-icon" aria-hidden="true"><i /><i /><b>✓</b></div><small>完成</small><h3>自動プレビューで確認</h3><p>Codexがローカルサイトを起動。PC・スマホ、画像、CTA、リンクを確認します。</p></li>
           </ol>
         </section>
 
         <section className="github-guide" aria-labelledby="github-guide-title">
           <div className="github-guide-copy">
-            <span className="kicker">BEFORE YOU START</span>
-            <h2 id="github-guide-title">GitHubって、なに？</h2>
-            <p><strong>LPのファイルをインターネット上に保管する場所</strong>です。今回は、CodexがつくったLPを保存する「専用の保管箱」として使います。プログラミングの知識は必要ありません。</p>
+            <span className="kicker">PUBLISH LATER</span>
+            <h2 id="github-guide-title">公開は、完成を見てから。</h2>
+            <p><strong>GitHubの準備は任意です。</strong>まずローカルでLPを完成・確認し、共有したくなった時点でリポジトリを用意できます。最初から公開したい方だけURLを登録してください。</p>
             <div className="github-links">
               <a href="https://github.com/signup" target="_blank" rel="noreferrer">初めての方：無料アカウントを作る <span>↗</span></a>
               <a href="https://github.com/new" target="_blank" rel="noreferrer">アカウントがある方：空の保管箱を作る <span>↗</span></a>
             </div>
           </div>
-          <ol className="github-mini-flow" aria-label="GitHubで準備する3ステップ">
-            <li><span>1</span><div><strong>アカウントを作る</strong><small>メールアドレスで無料登録</small></div></li>
-            <li><span>2</span><div><strong>New repositoryを選ぶ</strong><small>LP専用の空の保管箱を作成</small></div></li>
-            <li><span>3</span><div><strong>URLをコピーする</strong><small>LPmakerの入力欄へ貼り付け</small></div></li>
+          <ol className="github-mini-flow" aria-label="改善された3つのポイント">
+            <li><span>1</span><div><strong>URLなしでZIP出力</strong><small>リポジトリがなくても制作開始</small></div></li>
+            <li><span>2</span><div><strong>ローカルサイトを自動起動</strong><small>完成後すぐプレビューを確認</small></div></li>
+            <li><span>3</span><div><strong>確認してから公開</strong><small>必要な人だけGitHubへ保存</small></div></li>
           </ol>
         </section>
 
@@ -914,7 +934,7 @@ export default function Home() {
         </section>
 
         <section className="guide-final-cta">
-          <span>準備するものは、LPの情報と空のリポジトリURLだけ。</span>
+          <span>準備するものはLPの情報だけ。リポジトリはあとからで大丈夫です。</span>
           <button className="guide-start" type="button" onClick={() => { setShowGuide(false); window.scrollTo({ top: 0 }); }}>
             {hasDraft ? "保存中の設計図をひらく" : "設計図づくりをはじめる"}<span>→</span>
           </button>
@@ -980,28 +1000,32 @@ export default function Home() {
               <div className="stage-heading">
                 <span className="kicker">まず、素材を集める</span>
                 <h1>近い答えを、<br />選んでください。</h1>
-                <p>先にこのLP専用の空リポジトリを用意し、そのURLを登録します。その後は選択肢から選ぶだけで、Codexが読み取れる設計図に整います。</p>
+                <p>まずはローカル制作で大丈夫です。選択肢から答えるだけで、CodexがLPを作り、完成後すぐプレビューできる設計図に整います。</p>
               </div>
 
               <section className="repo-setup" aria-labelledby="repo-setup-title">
                 <div className="repo-setup-number">準備</div>
                 <div className="repo-setup-copy">
-                  <span className="review-label">BEFORE INPUT</span>
-                  <h2 id="repo-setup-title">このLP専用のリポジトリを先に用意します。</h2>
-                  <p>GitHubなどで空のリポジトリを1つ作り、取得したURLを貼り付けてください。CodexはこのURLを制作先として使い、リポジトリ直下の index.html を公開入口にします。</p>
+                  <span className="review-label">WORK MODE</span>
+                  <h2 id="repo-setup-title">最初は「ローカルで作る」がおすすめです。</h2>
+                  <p>GitHubがなくてもZIPを書き出せます。Codexがこのフォルダ内にLPを作り、ローカルサイトを起動して表示を確認します。公開したい方だけリポジトリを登録してください。</p>
+                  <div className="publish-mode-picker" role="group" aria-label="LPの制作・公開方法">
+                    <button className={data.publishMode === "local" ? "selected" : ""} type="button" aria-pressed={data.publishMode === "local"} onClick={() => update("publishMode", "local")}><span>おすすめ</span><strong>まずローカルで作る</strong><small>完成を確認してから公開先を決める</small></button>
+                    <button className={data.publishMode === "github" ? "selected" : ""} type="button" aria-pressed={data.publishMode === "github"} onClick={() => update("publishMode", "github")}><span>公開する方</span><strong>GitHubへ公開する</strong><small>指定リポジトリへcommit・pushする</small></button>
+                  </div>
                   <div className="static-output-note">
-                    <span><strong>制作先</strong> 個別リポジトリ</span>
-                    <span><strong>プレビュー</strong> index.html</span>
-                    <span><strong>使用しない</strong> ChatGPT Sites</span>
+                    <span><strong>制作先</strong> {data.publishMode === "local" ? "共有したローカルフォルダ" : "個別リポジトリ"}</span>
+                    <span><strong>自動確認</strong> PC・スマホ・画像・CTA・リンク</span>
+                    <span><strong>プレビュー</strong> localhost:8000/index.html</span>
                   </div>
                   <ol>
-                    <li>新しい空のリポジトリを作る</li>
-                    <li>リポジトリのURLをコピーする</li>
-                    <li>下の入力欄へ貼り付ける</li>
+                    <li>リポジトリなしでZIPを書き出す</li>
+                    <li>CodexがLPと画像を制作する</li>
+                    <li>ローカルサイトを開いて確認する</li>
                   </ol>
-                  <label>個別リポジトリURL <em>必須</em><small>例：GitHubリポジトリのHTTPS URL</small>
+                  {data.publishMode === "github" && <label>個別リポジトリURL <em>公開する場合のみ</em><small>未入力でもZIPは書き出せます。その場合はローカル制作として進みます。</small>
                     <input value={data.repositoryUrl} onChange={(e) => update("repositoryUrl", e.target.value)} placeholder="https://github.com/ユーザー名/lp-project.git" inputMode="url" />
-                  </label>
+                  </label>}
                 </div>
               </section>
 
@@ -1218,7 +1242,7 @@ export default function Home() {
                   <h2>{data.projectName || "名称未入力のプロジェクト"}</h2>
                   <p>{offeringAnswer || "商品・サービスがまだ選択されていません。"}</p>
                   <dl>
-                    <div><dt>制作先</dt><dd>{data.repositoryUrl || "未入力"}</dd></div>
+                    <div><dt>制作方法</dt><dd>{data.publishMode === "github" && data.repositoryUrl.trim() ? `GitHubへ公開：${data.repositoryUrl}` : "まずローカルで制作・確認"}</dd></div>
                     <div><dt>想定ユーザー</dt><dd>{audienceAnswer || "未選択"}</dd></div>
                     <div><dt>お客さま像</dt><dd>{data.personaMode === "ai" ? "商品情報からCodexが推測" : "自分で選んだ内容を使用"}</dd></div>
                     <div><dt>ゴール</dt><dd>{goalAnswer || "未選択"}</dd></div>
@@ -1253,14 +1277,18 @@ export default function Home() {
                 <div className="after-export-heading">
                   <span className="review-label">AFTER EXPORT</span>
                   <h2 id="after-export-title">最初に制作ルールをセットしてから、フォルダを共有します。</h2>
-                  <p>フォルダを共有するだけでは作業開始になりません。次の4ステップなら、Codexが迷わず実装を始められます。</p>
+                  <p>フォルダを共有するだけでは作業開始になりません。次の4ステップで、制作からローカルプレビュー確認まで進めます。</p>
                 </div>
                 <ol className="after-export-steps">
                   <li><span>1</span><div><strong>制作ルールをセット</strong><p>下の「① 制作ルールをコピー」を押し、新しいCodexタスクへ貼り付けて送信します。</p></div></li>
                   <li><span>2</span><div><strong>ZIPを展開して共有</strong><p>ZIPを「すべて展開」し、展開後のフォルダを同じCodexタスクへ共有します。</p></div></li>
                   <li><span>3</span><div><strong>開始文を送る</strong><p>下の「② 開始文をコピー」を押し、フォルダと一緒に貼り付けて送信します。</p></div></li>
-                  <li><span>4</span><div><strong>index.htmlを確認</strong><p>Codexが実装を進め、ローカルの index.html を確認してからcommit・pushします。</p></div></li>
+                  <li><span>4</span><div><strong>自動プレビューを確認</strong><p>Codexがローカルサイトを起動し、PC・スマホ表示、画像、CTA、リンクを確認します。</p></div></li>
                 </ol>
+                <div className="improvement-summary">
+                  <strong>今回改善したポイント</strong>
+                  <ul><li>リポジトリURLなしでもZIPを書き出せます</li><li>制作後は localhost のプレビューを自動で起動します</li><li>PC・スマホ・画像・文字切れ・CTA・リンクを確認してから完成報告します</li><li>GitHubへの公開は希望する場合だけ行います</li></ul>
+                </div>
                 <div className="codex-copy-grid">
                   <div className="codex-instruction setup-instruction">
                     <div><strong>① 先に制作ルールをセット</strong><p>新しいCodexタスクへ貼り付けて送信します。LP制作の役割・禁止事項・完了条件を先に共有します。</p></div>
