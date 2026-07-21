@@ -27,7 +27,7 @@ test("builds a GitHub Pages-ready static site", () => {
   const appSource = readFileSync("src/App.tsx", "utf8");
   assert.match(appSource, /mascot-mochisura-bear-hood-01\.png/);
   assert.match(appSource, /完成までの、5つのステップ/);
-  assert.match(appSource, /公開は、完成を見てから/);
+  assert.match(appSource, /公開は、<br \/>完成を見てから/);
   assert.match(appSource, /設計図づくりをはじめる/);
   assert.match(appSource, /全体の流れ/);
   assert.match(appSource, /forbiddenPlatforms/);
